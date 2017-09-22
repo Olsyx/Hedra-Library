@@ -148,7 +148,7 @@ public static partial class Hedra {
             float perpendicularDistance = PerpendicularDistance(A, B, P); // Triangle height on P
 
             float baseIntersectionLength = Mathf.Sqrt(Mathf.Pow(hypotenuse, 2) - Mathf.Pow(perpendicularDistance, 2));
-            float sign = Mathf.Clamp(Vector3.Dot(AP, AB), -1, 1);
+            float sign = Vector3.Dot(AP, AB) < 0 ? -1 : 1;
 
             return baseIntersectionLength * sign;
         }
