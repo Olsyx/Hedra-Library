@@ -81,11 +81,11 @@ public static partial class Hedra {
         }
 
         /// <summary>
-        /// Turns negative angles in degrees into the range [0, 360]
+        /// Turns negative angles in degrees into the range [0, 360]. Angles higher than 360 are not clamped.
         /// </summary>
         /// <param name="degrees"></param>
         /// <returns></returns>
-        public static float ClampNegativAngle(float degrees) {
+        public static float ClampNegativeAngle(float degrees) {
             if (degrees >= 0f) {
                 return degrees;
             }
