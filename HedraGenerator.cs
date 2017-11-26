@@ -10,14 +10,15 @@
  * @since   Unity 2017.1.0p4
  */
 
-
-using Hedras.Objects;
+ 
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using HedraLibrary.Components;
 using UnityEngine;
 
- public static partial class Hedra {
+namespace HedraLibrary {
+    public static partial class Hedra {
         /// <summary>
         /// Returns a path of zigzaguing points.
         /// </summary>
@@ -47,7 +48,7 @@ using UnityEngine;
         /// <param name="subdivisions">Number of divisions of the vector represented by two turning points.</param>
         /// <param name="rotation">Initial rotation, in degrees, around origin.</param>
         /// <returns></returns>
-        public static List<Vector2> Zigzag(Vector2 origin, int deviation, int direction, float extent, float amplitude, int turns, int subdivisions, float rotation) {      
+        public static List<Vector2> Zigzag(Vector2 origin, int deviation, int direction, float extent, float amplitude, int turns, int subdivisions, float rotation) {
             float width = amplitude / 2;
             float height = extent / (turns - 1);
             int pathDirection = direction >= 1 ? 1 : -1;
@@ -78,7 +79,7 @@ using UnityEngine;
                 points.AddRange(dividedVector);
             }
 
-            points = points.Distinct().ToList();  
+            points = points.Distinct().ToList();
 
             return points;
         }
@@ -109,8 +110,8 @@ using UnityEngine;
         /// <param name="rotation">Rotation of the wave around the axis; rotates its direction.</param>
         /// <returns></returns>
         public static List<Vector2> Wave(Vector2 origin, float extent, float amplitude, float frequency, int points, float rotation) {
-            float separation = extent / (points-1);
-            
+            float separation = extent / (points - 1);
+
             List<Vector2> wavePoints = new List<Vector2>();
             for (int i = 0; i < points; i++) {
                 Vector2 point = new Vector2();
@@ -120,11 +121,10 @@ using UnityEngine;
                 point = Rotate(origin, point, rotation);
 
                 wavePoints.Add(point);
-            }            
+            }
 
             return wavePoints;
         }
-
 
 
         /// <summary>
@@ -150,33 +150,6 @@ using UnityEngine;
             return Arc(origin, 360f, radius, points, rotation);
         }
 
-
-        /// <summary>
-        /// Returns points in a defined ellipse.
-        /// </summary>
-        /// <param name="origin">Center of the ellipse.</param>
-        /// <param name="horizontalRadius">Horizontal radius of the ellipse; maximum distance between its center and a point horizontally.</param>
-        /// <param name="verticalRadius">Vertical radius of the ellipse; maximum distance between its center and a point vertically.</param>
-        /// <param name="points">Number of points in the ellipse.</param>
-        /// <param name="rotation">Rotation of the ellipse; change the position of the first point.</param>
-        /// <returns></returns>
-        public static List<Vector2> Ellipse(Vector2 origin, float horizontalRadius, float verticalRadius, int points, float rotation) {
-            return Arc(origin, 360f, horizontalRadius, verticalRadius, points, rotation);
-        }
-
-        /// <summary>
-        /// Returns points in a defined ellipse.
-        /// </summary>
-        /// <param name="origin">Center of the ellipse.</param>
-        /// <param name="horizontalRadiusVector">Vector from origin to the horizontal radius. Defines the length of the horizontal radius.</param>
-        /// <param name="verticalRadiusVector">Vector from origin to the vertical radius. Defines the length of the vertical radius.</param>
-        /// <param name="points">Number of points in the ellipse.</param>
-        /// <param name="rotation">Rotation of the ellipse; change the position of the first point.</param>
-        /// <returns></returns>
-        public static List<Vector2> Ellipse(Vector2 origin, Vector2 horizontalRadiusVector, Vector2 verticalRadiusVector, int points, float rotation) {
-            return Arc(origin, 360f, horizontalRadiusVector, verticalRadiusVector, points, rotation);
-        }
-        
 
         /// <summary>
         /// Returns points in a defined arc.
@@ -242,8 +215,6 @@ using UnityEngine;
 
             return circle;
         }
-
-
 
 
         /// <summary>
@@ -334,8 +305,8 @@ using UnityEngine;
         /// <param name="rotation">Rotation of the path around the direction vector.</param>
         /// <returns></returns>
         public static List<Vector3> Zigzag(Vector3 origin, Vector3 direction, int deviation, float extent, float amplitude, int turns, int subdivisions, float rotation) {
-            
-            GeometricalPlane plane = new GeometricalPlane(direction);
+
+            Components.Plane plane = new Components.Plane(direction);
 
             float width = amplitude / 2;
             float span = extent / (turns - 1);
@@ -351,7 +322,7 @@ using UnityEngine;
                 point.y = 0f;
                 point.z = span * i;
 
-                point = plane.Rotate(point, rotation, GeometricalPlane.Axis.N);
+                point = plane.Rotate(point, rotation, Components.Plane.Axis.N);
                 point = origin + plane.TransformPoint(point);
 
                 vectors.Add(point);
@@ -389,7 +360,6 @@ using UnityEngine;
             return Wave(origin, direction, extent, amplitude, frequency, points, rotation);
         }
 
-        
         /// <summary>
         /// Returns points in a defined wave.
         /// </summary>
@@ -403,7 +373,7 @@ using UnityEngine;
         /// <returns></returns>
         public static List<Vector3> Wave(Vector3 origin, Vector3 direction, float extent, float amplitude, float frequency, int points, float rotation) {
 
-            GeometricalPlane plane = new GeometricalPlane(direction);
+            Components.Plane plane = new Components.Plane(direction);
             float separation = extent / (points - 1);
 
             List<Vector3> wavePoints = new List<Vector3>();
@@ -413,7 +383,7 @@ using UnityEngine;
                 point.y = 0f;
                 point.z = separation * i;
 
-                point = plane.Rotate(point, rotation, GeometricalPlane.Axis.N);
+                point = plane.Rotate(point, rotation, Components.Plane.Axis.N);
                 point = origin + plane.TransformPoint(point);
 
                 wavePoints.Add(point);
@@ -421,7 +391,7 @@ using UnityEngine;
 
             return wavePoints;
         }
-        
+
         /// <summary>
         /// Returns points in a defined 3D circle.
         /// </summary>
@@ -433,7 +403,7 @@ using UnityEngine;
         public static List<Vector3> Circle(Vector3 origin, Vector3 normal, float radius, int points) {
             return Circle(origin, normal, radius, points, 0f);
         }
-        
+
         /// <summary>
         /// Returns points in a defined 3D circle.
         /// </summary>
@@ -479,7 +449,7 @@ using UnityEngine;
             }
 
             Vector3 arcNormal = normal - origin;
-            GeometricalPlane plane = new GeometricalPlane(arcNormal);
+            Components.Plane plane = new Components.Plane(arcNormal);
 
             float amplitudeAngle = ClampAngle(amplitude);
 
@@ -499,8 +469,6 @@ using UnityEngine;
 
             return circle;
         }
-
-
 
 
         /// <summary>
@@ -538,7 +506,7 @@ using UnityEngine;
             }
 
             Vector3 circleNormal = direction - origin;
-            GeometricalPlane plane = new GeometricalPlane(direction);
+            Components.Plane plane = new Components.Plane(direction);
 
             float width = (outerRadius - innerRadius) / (points - 1);
             float height = extent / (points - 1);
@@ -556,4 +524,5 @@ using UnityEngine;
 
             return spiral;
         }
-    } 
+    }
+}

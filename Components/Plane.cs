@@ -12,12 +12,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Hedras.Objects { 
+namespace HedraLibrary.Components {
 
     /// <summary>
     /// A 3D plane represented by its two axis I and J, and its normal vector.
     /// </summary>
-    public class GeometricalPlane {
+    public class Plane {
         public enum Axis {
             I, J, N
         }
@@ -41,11 +41,11 @@ namespace Hedras.Objects {
                 return N;
             }
         }
-        
+
         float[][] m_planeToWorld;
         float[][] m_worldToPlane;
 
-        public GeometricalPlane(Vector3 i, Vector3 j) {
+        public Plane(Vector3 i, Vector3 j) {
             I = i.normalized;
             J = j.normalized;
             N = Vector3.Cross(I, J).normalized;
@@ -53,7 +53,7 @@ namespace Hedras.Objects {
             GenerateTransformMatrixes();
         }
 
-        public GeometricalPlane(Vector3 normal) {
+        public Plane(Vector3 normal) {
             this.N = normal.normalized;
 
             Vector3 normalPerpendicular = Vector3.up;
@@ -61,7 +61,7 @@ namespace Hedras.Objects {
                 normalPerpendicular = new Vector3(this.N.y, -this.N.x, 0f);
             } else if (normal.x == 0f) {
                 normalPerpendicular = new Vector3(0f, this.N.z, -this.N.y);
-            } else { 
+            } else {
                 normalPerpendicular = new Vector3(this.N.z, 0f, -this.N.x);
             }
 
@@ -70,7 +70,7 @@ namespace Hedras.Objects {
 
             GenerateTransformMatrixes();
         }
-        
+
         void GenerateTransformMatrixes() {
             m_planeToWorld = new float[3][];
             m_planeToWorld[0] = new float[3];
@@ -105,7 +105,7 @@ namespace Hedras.Objects {
             m_worldToPlane[2][1] = Vector3.Dot(N, Vector3.up);
             m_worldToPlane[2][2] = Vector3.Dot(N, Vector3.forward);
         }
-        
+
         /// <summary>
         /// Returns a point at given degrees and distance from an origin.
         /// </summary>
@@ -150,10 +150,10 @@ namespace Hedras.Objects {
                 rotatedPoint.y = point.y * Mathf.Cos(angle) - point.z * Mathf.Sin(angle);
                 rotatedPoint.z = point.y * Mathf.Sin(angle) + point.z * Mathf.Cos(angle);
             }
-            
+
             if (pivotAxis == Axis.J) {
                 rotatedPoint.x = point.x * Mathf.Cos(angle) + point.z * Mathf.Sin(angle);
-                rotatedPoint.z = - point.x * Mathf.Sin(angle) + point.z * Mathf.Cos(angle);
+                rotatedPoint.z = -point.x * Mathf.Sin(angle) + point.z * Mathf.Cos(angle);
             }
 
             if (pivotAxis == Axis.N) {

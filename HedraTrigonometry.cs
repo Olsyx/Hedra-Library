@@ -1,163 +1,18 @@
 ﻿/*
- * Hedra's partial class responsible for all trigonometrical calculations.
- *
- * @author  Olsyx (Olatz Castaño)
- * @source https://github.com/Darkatom/Hedra-Library
- * @since   Unity 2017.1.0p4
- */
+* Hedra's partial class responsible for all trigonometrical calculations.
+*
+* @author  Olsyx (Olatz Castaño)
+* @source https://github.com/Darkatom/Hedra-Library
+* @since   Unity 2017.1.0p4
+*/
 
 using System.Collections;
 using System.Collections.Generic;
+using HedraLibrary.Components;
 using UnityEngine;
 
-public static partial class Hedra {
-        
-        /// <summary>
-        /// Returns a point P on vector AB at given distance from A.
-        /// </summary>
-        /// <param name="A"></param>
-        /// <param name="B"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
-        public static Vector2 GetPoint(Vector2 A, Vector2 B, float distance) {
-            Vector2 AB = B - A;
-            return A + AB.normalized * distance;
-        }
-
-        /// <summary>
-        /// Returns a point in the circle of radius R at D degrees.
-        /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="radius"></param>
-        /// <param name="degrees"></param>
-        /// <returns></returns>
-        public static Vector2 GetPoint(Vector2 origin, float radius, float degrees) {
-            float angle = degrees * Mathf.Deg2Rad;
-            Vector2 point = origin;
-            point.x = origin.x + radius * Mathf.Cos(angle);
-            point.y = origin.y + radius * Mathf.Sin(angle);
-            return point;
-        }
-
-        /// <summary>
-        /// Returns a point in the circle of radius R at D degrees.
-        /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="radius"></param>
-        /// <param name="degrees"></param>
-        /// <returns></returns>
-        public static Vector2 GetPoint(Vector2 origin, float horizontalRadius, float verticalRadius, float degrees) {
-            float angle = degrees * Mathf.Deg2Rad;
-            Vector2 point = origin;
-            point.x = origin.x + horizontalRadius * Mathf.Cos(angle);
-            point.y = origin.y + verticalRadius * Mathf.Sin(angle);
-            return point;
-        }
-
-        /// <summary>
-        /// Returns the points obtained from subdividing the AB vector, including both A and B.
-        /// </summary>
-        /// <param name="A">Origin of the vector.</param>
-        /// <param name="B">End of the vector.</param>
-        /// <param name="subdivisions">Number of subdivisions.</param>
-        /// <returns></returns>
-        public static List<Vector2> Subdivide(Vector2 A, Vector2 B, int subdivisions) {
-            List<Vector2> points = new List<Vector2>();
-            points.Add(A);
-            points.Add(B);
-
-            if (subdivisions <= 1) {
-                return points;
-            }
-
-            Vector2 AB = B - A;
-            float distance = AB.magnitude / subdivisions;
-            for (int i = 1; i < subdivisions; i++) {
-                Vector2 point = GetPoint(A, B, distance * i);
-                points.Add(point);
-            }
-
-            return points;
-        }
-
-        /// <summary>
-        /// Turns negative angles in degrees into the range [0, 360]. Angles higher than 360 are not clamped.
-        /// </summary>
-        /// <param name="degrees"></param>
-        /// <returns></returns>
-        public static float ClampNegativeAngle(float degrees) {
-            if (degrees >= 0f) {
-                return degrees;
-            }
-
-            return ClampAngle(degrees);
-        }
-
-        /// <summary>
-        /// Clamps a given angle in degrees into the range [0, 360]
-        /// </summary>
-        /// <param name="degrees"></param>
-        /// <returns></returns>
-        public static float ClampAngle(float degrees) {
-            float correctAngle = degrees % 360f;
-
-            if (correctAngle < 0) {
-                correctAngle = correctAngle + 360f;
-            }
-
-            return correctAngle;
-        }
-
-        /// <summary>
-        /// Returns the angle between points A and B from a provided origin of coordenates.
-        /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="pointA"></param>
-        /// <param name="pointB"></param>
-        /// <returns></returns>
-        public static float Angle(Vector2 origin, Vector2 pointA, Vector2 pointB) {
-            Vector2 A = pointA - origin;
-            Vector2 B = pointB - origin;
-
-            return Angle(A, B);
-        }
-
-        /// <summary>
-        /// Returns the angle between vectors A and B.
-        /// </summary>
-        /// <param name="A"></param>
-        /// <param name="B"></param>
-        /// <returns></returns>
-        public static float Angle(Vector2 A, Vector2 B) {
-            float angle = Mathf.Atan2(A.y, A.x) - Mathf.Atan2(B.y, B.x);
-            return angle * Mathf.Rad2Deg;
-        }
-
-        /// <summary>
-        /// Rotates point P by the given degrees around origin.
-        /// </summary>
-        /// <param name="vector"></param>
-        /// <param name="degrees"></param>
-        /// <returns></returns>
-        public static Vector2 Rotate(Vector2 origin, Vector2 P, float degrees) {
-            Vector2 vector = P - origin;
-            return origin + Rotate(vector, degrees);
-        }
-
-        /// <summary>
-        /// Rotates a vector by the given degrees.
-        /// </summary>
-        /// <param name="vector"></param>
-        /// <param name="degrees"></param>
-        /// <returns></returns>
-        public static Vector2 Rotate(Vector2 vector, float degrees) {
-            float angle = degrees * Mathf.Deg2Rad;
-            Vector2 result = vector;
-            result.x = vector.x * Mathf.Cos(angle) - vector.y * Mathf.Sin(angle);
-            result.y = vector.x * Mathf.Sin(angle) + vector.y * Mathf.Cos(angle);
-            return result;
-        }
-        
+namespace HedraLibrary {
+    public static partial class Hedra {
         /// <summary>
         /// Area of the triangle formed by the points A, B and C.
         /// </summary>
@@ -178,7 +33,7 @@ public static partial class Hedra {
             float area = 0.5f * a * b * Mathf.Sin(angleC);
             return area;
         }
-        
+
         /// <summary>
         /// Returns the unsigned shortest distance from point P to vector AB. Also called triangle height.
         /// </summary>
@@ -198,7 +53,7 @@ public static partial class Hedra {
         }
 
         /// <summary>
-        /// Returns the distance from A to the intersecting point of P over vector AB.
+        /// Given the vector AB, and a point P, returns the distance from A to the intersecting point X, where PX is perpendicular to AB.
         /// </summary>
         /// <param name="A"></param>
         /// <param name="B"></param>
@@ -213,8 +68,7 @@ public static partial class Hedra {
             float perpendicularDistance = PerpendicularDistance(A, B, P); // Triangle height on P
 
             float baseIntersectionLength = Mathf.Sqrt(Mathf.Pow(hypotenuse, 2) - Mathf.Pow(perpendicularDistance, 2));
-            float sign = Mathf.Clamp(Vector2.Dot(AP, AB), -1, 1);
-
+            float sign = HardClamp(Vector2.Dot(AP.normalized, AB.normalized), -1, 1);
             return baseIntersectionLength * sign;
         }
 
@@ -230,19 +84,6 @@ public static partial class Hedra {
             return GetPoint(A, B, triangleBase);
         }
 
-        /// <summary>
-        /// Returns the projection value of P on the vector AB.
-        /// </summary>
-        /// <param name="A"></param>
-        /// <param name="B"></param>
-        /// <param name="P">param>
-        /// <param name="reverse"></returns>
-        public static float ProjectionValue(Vector2 A, Vector2 B, Vector2 P) {
-            Vector2 AB = B - A;
-            Vector2 AP = P - A;
-            return Vector2.Dot(AB, AP);
-        }
-              
         /// <summary>
         /// Returns the closest point to P on the segment AB. If P is not projectable over AB, the closest end is returned.
         /// </summary>
@@ -263,5 +104,92 @@ public static partial class Hedra {
 
             return intersectionPoint;
         }
+
+        /// <summary>
+        /// Calculates the intersection of the lines or segments AB and CD.
+        /// </summary>
+        /// <param name="A">First point of Line 1.</param>
+        /// <param name="B">Second point of Line 1.</param>
+        /// <param name="C">First point of Line 2.</param>
+        /// <param name="D">Second point of Line 2.</param>
+        /// <param name="onSegment">If true, point must be contained in both segments.</param>
+        /// <returns>The intersection point of two lines or segments.(NaN, NaN) will be returned 
+        /// if they are parallel or the intersection point is not contained on both segments, 
+        /// should On Segment be true.</returns>
+        public static Vector2 IntersectionPoint(Vector2 A, Vector2 B, Vector2 C, Vector2 D, bool onSegment) {
+            if (onSegment) {
+                Segment2D L1 = new Segment2D(A, B);
+                Segment2D L2 = new Segment2D(C, D);
+                return L1.IntersectionPoint(L2);
+            } else {
+                Line2D L1 = new Line2D(A, B);
+                Line2D L2 = new Line2D(C, D);
+                return L1.IntersectionPoint(L2);
+            }
+        }
+
+        /// <summary>
+        /// Calculates the intersection point of the line or segment AB with a Collider.
+        /// </summary>
+        /// <param name="collider"></param>
+        /// <param name="pointA">First point.</param>
+        /// <param name="pointB">Second point.</param>
+        /// <param name="onSegment">If true, point must be contained by the colliding segments (both collider edges and AB).</param>
+        /// <returns>The intersection points of a line or segment with the edges of a collider.</returns>
+        public static List<Vector2> IntersectionPoints(Collider2D collider, Vector2 pointA, Vector2 pointB, bool onSegment) {
+            if (onSegment) {
+                Segment2D segment = new Segment2D(pointA, pointB);
+                return IntersectionPoints(collider, segment);
+            } else {
+                Line2D line = new Segment2D(pointA, pointB);
+                return IntersectionPoints(collider, line);
+            }
+        }
         
+        /// <summary>
+        /// Calculates the intersection point of the segment AB with a Collider.
+        /// </summary>
+        /// <param name="collider"></param>
+        /// <param name="pointA">First point.</param>
+        /// <param name="pointB">Second point.</param>
+        /// <returns>The intersection points of a segment with the edges of a collider.</returns>
+        public static List<Vector2> IntersectionPoints(Collider2D collider, Segment2D segment) {
+            Box2D box = new Box2D(collider);
+            return box.IntersectionPoints(segment);
+        }
+
+        /// <summary>
+        /// Calculates the intersection point of the line AB with a Collider.
+        /// </summary>
+        /// <param name="collider"></param>
+        /// <param name="pointA">First point.</param>
+        /// <param name="pointB">Second point.</param>
+        /// <returns>The intersection points of a line with the edges of a collider.</returns>
+        public static List<Vector2> IntersectionPoints(Collider2D collider, Line2D line) {
+            Box2D box = new Box2D(collider);
+            return box.IntersectionPoints(line);
+        }
+
+        /// <summary>
+        /// Returns the closest point of a collider to P.
+        /// </summary>
+        /// <param name="collider"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static Vector2 ClosestPoint(Collider2D collider, Vector2 P) {
+            Box2D box = new Box2D(collider);
+            return box.ClosestPointTo(P);
+        }
+
+        /// <summary>
+        /// Returns the furthest point of a collider from P.
+        /// </summary>
+        /// <param name="collider"></param>
+        /// <param name="P"></param>
+        /// <returns></returns>
+        public static Vector2 FurthestPoint(Collider2D collider, Vector2 P) {
+            Box2D box = new Box2D(collider);
+            return box.FurthestPointFrom(P);
+        }
     }
+}
