@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace HedraLibrary.Components {
     public struct SlopeInterceptEquation {
+
         // Slope-Intercept line equation y = mx + b.
         public float M;
         public float B;
@@ -105,6 +106,8 @@ namespace HedraLibrary.Components {
     }
 
     public class Line2D {
+        protected const float EPSILON = 0.001f;   // Constant for float precise operations
+
         // Line points
         public Vector2 PointA { get; protected set; }
         public Vector2 PointB { get; protected set; }
@@ -169,6 +172,18 @@ namespace HedraLibrary.Components {
             float cross = AP.x * Direction.y - AP.y * Direction.x;
             return (cross == 0);
         }
+
+        /// <summary>
+        /// Returns true if the point is contained in this segment or as close as a given margin.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public virtual bool Contains(Vector2 point, float margin) {
+            float distance = Vector2.Distance(PerpendicularPoint(point), point);
+
+            return Contains(point) || distance <= margin;
+        }
+
 
         /// <summary>
         /// Returns the situation of the point regarding this line or segment.

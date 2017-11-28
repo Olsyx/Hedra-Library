@@ -47,22 +47,22 @@ namespace HedraLibrary {
             return Physics2D.OverlapBoxAll(position, boxSize, 0f, mask);
         }
 
-        public static Vector2 CorrectPositionAfterCollision(Vector2 position, Collider2D subjectCollider, Collider2D obstacleCollider) {
+        public static Vector2 CorrectPositionAfterCollision(Vector2 position, Collider2D subjectCollider, Collider2D obstacleCollider, float offset = 0f) {
             Box2D subject = new Box2D(subjectCollider);
             subject.Center = position;
-
             Box2D obstacle = new Box2D((Collider2D)obstacleCollider);            
             Vector2 closestPoint = obstacle.ClosestPointTo(subject);
 
-            Vector2 subjectPoint = Vector2.zero;
+            Vector2 subjectPoint, distance;
             if (obstacle.Contains(subject.Center)) {
                 subjectPoint = subject.FurthestPointFrom(closestPoint);
+                distance = (closestPoint - subjectPoint);
             } else {
                 subjectPoint = subject.ClosestPointTo(closestPoint);
+                distance = -((closestPoint - subjectPoint).magnitude * (closestPoint - subject.Center).normalized);
             }
             
-            Vector2 offset = (closestPoint - subjectPoint);
-            return position + offset;
+            return position + distance + distance.normalized * offset;
         }
 
         static void PrintColliders(Collider2D[] colliders) {

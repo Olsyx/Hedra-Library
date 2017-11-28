@@ -80,7 +80,26 @@ namespace HedraLibrary.Components {
             Edges[2] = new Segment2D(Corners[2], Corners[3]);
             Edges[3] = new Segment2D(Corners[3], Corners[0]);
         }
+
+        public bool Intersects(Vector2 A, Vector2 B, bool onSegment) {
+            if (onSegment) {
+                Segment2D segment = new Segment2D(A, B);
+                return Intersects(segment);
+            } else {
+                Line2D line = new Segment2D(A, B);
+                return Intersects(line);
+            }
+        }
+
+        public bool Intersects(Segment2D segment) {
+            return Intersects((Line2D)segment);
+        }
         
+        public bool Intersects(Line2D line) {
+            List<Vector2> intersectionPoints = IntersectionPoints(line);
+            return intersectionPoints != null && intersectionPoints.Count > 0;
+        }
+
         /// <summary>
         /// Calculates the intersection point of the line or segment AB with this box.
         /// </summary>
@@ -116,19 +135,44 @@ namespace HedraLibrary.Components {
             List<Vector2> intersections = new List<Vector2>();
 
             Vector2 point;
-            for (int i = 0; i < Corners.Length - 1; i++) {
-                point = line.IntersectionPoint(Corners[i], Corners[i + 1]);
+            for (int i = 0; i < Edges.Length; i++) {
+                point = line.IntersectionPoint(Edges[i]);
                 if (point.x != float.NaN && point.y != float.NaN) {
                     intersections.Add(point);
                 }
             }
 
-            point = line.IntersectionPoint(Corners[Corners.Length - 1], Corners[0]);
-            if (point.x != float.NaN && point.y != float.NaN) {
-                intersections.Add(point);
-            }
-
             return intersections;
+        }
+
+        /// <summary>
+        /// Check whether a point is part of one of this box's edges or not.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public bool ContainsInAnyEdge(Vector2 point) {
+            int i = 0;
+            while (i < Edges.Length && !Edges[i].Contains(point)) {
+                Debug.Log("Edge " + i + " does not contain " + point);
+                i++;
+            }
+            Debug.Log("Edge " + i + " contains " + point);
+            return i < Edges.Length;
+        }
+
+        /// <summary>
+        /// Check whether a point is part of one of this box's edges, is at least at margin distance, or not.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public bool ContainsInAnyEdge(Vector2 point, float margin) {
+            int i = 0;
+            while (i < Edges.Length && !Edges[i].Contains(point, margin)) {
+                Debug.Log("Edge " + i + " does not contain " + point);
+                i++;
+            }
+            Debug.Log("Edge " + i + " contains " + point);
+            return i < Edges.Length;
         }
 
         /// <summary>

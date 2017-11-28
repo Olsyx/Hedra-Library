@@ -4,6 +4,7 @@ using UnityEngine;
 
 
 namespace HedraLibrary.Components {
+
     public class Segment2D : Line2D {
 
         public Vector2 Center { get; protected set; }
@@ -42,10 +43,10 @@ namespace HedraLibrary.Components {
         /// <param name="point"></param>
         /// <returns></returns>
         public override bool Contains(Vector2 point) {
-            Vector2 AP = point - PointA;
-            Vector2 PB = PointB - point;
-            return Vector2.Dot(Direction, AP) >= 0 && Vector2.Dot(Direction, PB) >= 0;
+            float equation = point.y - (SlopeEquation.M * point.x + SlopeEquation.B);
+            return Mathf.Abs(equation) < EPSILON;
         }
+        
 
         /// <summary>
         /// Returns the intersection point of this segment with a perpendicular line casted from the given point, 
