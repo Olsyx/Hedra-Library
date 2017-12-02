@@ -4,12 +4,14 @@
  * @author  Olsyx (Olatz Castaño)
  * @source https://github.com/Darkatom/Hedra-Library
  * @since   Unity 2017.1.0p4
+ * @last    Unity 2017.2.0f3
  */
 
 using System.Collections;
 using System.Collections.Generic;
 using HedraLibrary.Components;
 using UnityEngine;
+using System.Linq;
 
 namespace HedraLibrary {
     public static partial class Hedra {
@@ -47,10 +49,42 @@ namespace HedraLibrary {
             return Physics2D.OverlapBoxAll(position, boxSize, 0f, mask);
         }
 
-        public static Vector2 CorrectPositionAfterCollision(Vector2 position, Collider2D subjectCollider, Collider2D obstacleCollider, float offset = 0f) {
+        /// <summary>
+        /// Calculates the movement of a body and corrects to a new position if a collision occurs.
+        /// Only takes the first collision found into account. Doesn't need a Rigidbody.
+        /// </summary>
+        /// <param name="currentPosition">The current position of the object.</param>
+        /// <param name="direction">The normalized direction of the movement.</param>
+        /// <param name="distance">The distance to be traveled.</param>
+        /// <param name="collider">The collider of the object.</param>
+        /// <param name="collisionOffset">Correcting offset after collision, should there be one.</param>
+        /// <param name="obstacleMask">The objects in this layer(s) will count as collisions.</param>
+        /// <returns>The position of an object after executing a movement, taking into account possible 2D collisions.</returns>
+        public static Vector2 MovementWithCollision(Vector2 currentPosition, Vector2 direction, float distance, Collider2D collider, float collisionOffset, LayerMask obstacleMask) {
+            Vector2 newPosition = currentPosition + collider.offset + direction.normalized * distance;
+
+            List<Collider2D> obstacles = Hedra.CheckCollisionAt(newPosition, collider, obstacleMask).ToList();
+            obstacles.Remove(collider);
+
+            if (obstacles.Count > 0) {
+                newPosition = Hedra.CorrectPositionAfterCollision(newPosition, collider, obstacles[0], collisionOffset);
+            }
+
+            return newPosition;
+        }
+        
+        /// <summary>
+        /// Corrects the position of an object after colliding with an obstacle.
+        /// </summary>
+        /// <param name="position">Current position of the subject.</param>
+        /// <param name="subjectCollider">Collider of the subject.</param>
+        /// <param name="obstacleCollider">Collider of the obstacle.</param>
+        /// <param name="collisionOffset">Correcting offset after collision.</param>
+        /// <returns>The corrected position of a 2D collision.</returns>
+        public static Vector2 CorrectPositionAfterCollision(Vector2 position, Collider2D subjectCollider, Collider2D obstacleCollider, float collisionOffset = 0f) {
             Box2D subject = new Box2D(subjectCollider);
             subject.Center = position;
-            Box2D obstacle = new Box2D((Collider2D)obstacleCollider);            
+            Box2D obstacle = new Box2D(obstacleCollider);            
             Vector2 closestPoint = obstacle.ClosestPointTo(subject);
 
             Vector2 subjectPoint, distance;
@@ -62,7 +96,7 @@ namespace HedraLibrary {
                 distance = -((closestPoint - subjectPoint).magnitude * (closestPoint - subject.Center).normalized);
             }
             
-            return position + distance + distance.normalized * offset;
+            return position + distance + distance.normalized * collisionOffset;
         }
 
         static void PrintColliders(Collider2D[] colliders) {

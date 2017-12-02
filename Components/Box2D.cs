@@ -50,8 +50,13 @@ namespace HedraLibrary.Components {
         public Box2D(Collider2D collider) {
             Transform owner = collider.gameObject.transform;
 
+            if (collider.GetType() == typeof(BoxCollider2D)) {
+                size = ((BoxCollider2D)collider).size;
+            } else {
+                size = collider.bounds.size;
+            }
+
             rotation = owner.rotation.eulerAngles.z;
-            size = collider.bounds.size;
             Area = size.x * size.y;
             Center = (Vector2)owner.position + collider.offset;
         }
@@ -59,8 +64,8 @@ namespace HedraLibrary.Components {
         public Box2D(BoxCollider2D collider) {
             Transform owner = collider.gameObject.transform;
 
-            rotation = owner.rotation.eulerAngles.z;
             size = collider.size;
+            rotation = owner.rotation.eulerAngles.z;
             Area = size.x * size.y;
             Center = (Vector2)owner.position + collider.offset;
         }

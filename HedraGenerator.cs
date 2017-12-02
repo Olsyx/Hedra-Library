@@ -8,9 +8,10 @@
  * @author  Olsyx (Olatz Castaño)
  * @source https://github.com/Darkatom/Hedra-Library
  * @since   Unity 2017.1.0p4
+ * @last    Unity 2017.2.0f3
  */
 
- 
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
