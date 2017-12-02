@@ -70,7 +70,7 @@ namespace HedraLibrary {
                 newPosition = Hedra.CorrectPositionAfterCollision(newPosition, collider, obstacles[0], collisionOffset);
             }
 
-            return newPosition;
+            return newPosition - collider.offset;
         }
         
         /// <summary>
