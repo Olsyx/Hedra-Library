@@ -12,22 +12,41 @@ namespace HedraLibrary.Components {
         public Segment2D(Vector2 pointA, Vector2 pointB) : base(pointA, pointB) {
             Center = Hedra.MidPoint(pointA, pointB);
         }
+        
 
         public override Vector2 IntersectionPoint(Vector2 pointA, Vector2 pointB) {
-            Segment2D line = new Segment2D(pointA, pointB);
-            return this.IntersectionPoint(line);
+            Segment2D segment = new Segment2D(pointA, pointB);
+            return this.IntersectionPoint(segment);
         }
 
         /// <summary>
-        /// Calculates the intersection point of two lines.
+        /// Calculates the intersection point of a line and a segment.
+        /// </summary>
+        /// <param name="other">The line to intersect with this one.</param>
+        /// /// <returns></returns>
+        public override Vector2 IntersectionPoint(Line2D other) {
+            Vector2 point = base.IntersectionPoint(other);
+            if (float.IsNaN(point.x) || float.IsInfinity(point.x)) {
+                return new Vector2(float.NaN, float.NaN);
+            }
+
+            if (Contains(point)) {
+                return point;
+            }
+
+            return new Vector2(float.NaN, float.NaN);
+        }
+
+        /// <summary>
+        /// Calculates the intersection point of two segments
         /// </summary>
         /// <param name="other">The line to intersect with this one.</param>
         /// <param name="segment">Segment intersection; the point must be contained in the line segment. If not contained, the returned Vector has int.MaxValue.</param>
         /// <returns></returns>
-        public override Vector2 IntersectionPoint(Line2D other) {
+        public virtual Vector2 IntersectionPoint(Segment2D other) {
             Vector2 point = base.IntersectionPoint(other);
             if (float.IsNaN(point.x) || float.IsInfinity(point.x)) {
-                return point;
+                return new Vector2(float.NaN, float.NaN);
             }
 
             if (Contains(point) && other.Contains(point)) {
@@ -43,8 +62,8 @@ namespace HedraLibrary.Components {
         /// <param name="point"></param>
         /// <returns></returns>
         public override bool Contains(Vector2 point) {
-            float equation = point.y - (SlopeEquation.M * point.x + SlopeEquation.B);
-            return Mathf.Abs(equation) < EPSILON;
+            float value = Vector2.Distance(PointA, point) + Vector2.Distance(point, PointB) - Vector2.Distance(PointA, PointB);
+            return -EPSILON < value && value < EPSILON;
         }
         
 

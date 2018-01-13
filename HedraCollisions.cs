@@ -84,19 +84,21 @@ namespace HedraLibrary {
         public static Vector2 CorrectPositionAfterCollision(Vector2 position, Collider2D subjectCollider, Collider2D obstacleCollider, float collisionOffset = 0f) {
             Box2D subject = new Box2D(subjectCollider);
             subject.Center = position;
-            Box2D obstacle = new Box2D(obstacleCollider);            
-            Vector2 closestPoint = obstacle.ClosestPointTo(subject);
+            Box2D obstacle = new Box2D(obstacleCollider);
 
-            Vector2 subjectPoint, distance;
-            if (obstacle.Contains(subject.Center)) {
-                subjectPoint = subject.FurthestPointFrom(closestPoint);
-                distance = (closestPoint - subjectPoint);
+            Vector2 corner = subject.DeepestCornerIn(obstacle);
+            Vector2 closestPoint;
+
+            if (corner.IsNaN() || corner.IsInfinity()) {
+                closestPoint = obstacle.DeepestCornerIn(subject);
+                corner = subject.ClosestPointTo(closestPoint);
             } else {
-                subjectPoint = subject.ClosestPointTo(closestPoint);
-                distance = -((closestPoint - subjectPoint).magnitude * (closestPoint - subject.Center).normalized);
+                Segment2D closestEdge = obstacle.ClosestEdgeTo(subject.Center);
+                closestPoint = closestEdge.PerpendicularPoint(corner);
             }
-            
-            return position + distance + distance.normalized * collisionOffset;
+
+            Vector2 direction = (closestPoint - corner);
+            return position + direction + direction.normalized * collisionOffset;
         }
 
         static void PrintColliders(Collider2D[] colliders) {

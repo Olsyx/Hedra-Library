@@ -123,7 +123,28 @@ namespace HedraLibrary.Components {
             Equation = new LineEquation(PointA, PointB);
             SlopeEquation = new SlopeInterceptEquation(PointA, PointB);
         }
+
+        public virtual bool Intersects(Vector2 A, Vector2 B, bool onSegment) {
+            if (onSegment) {
+                Segment2D segment = new Segment2D(A, B);
+                return Intersects(segment);
+            } else {
+                Line2D line = new Segment2D(A, B);
+                return Intersects(line);
+            }
+        }
+
+
+        public virtual bool Intersects(Segment2D segment) {
+            Vector2 point = IntersectionPoint(segment);
+            return !point.IsNaN() && !point.IsInfinity();
+        }
         
+        public virtual bool Intersects(Line2D line) {
+            Vector2 point = IntersectionPoint(line);
+            return !point.IsNaN() && !point.IsInfinity();
+        }
+
         /// <summary>
         /// Calculates the intersection point of two lines.
         /// </summary>

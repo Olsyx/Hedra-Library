@@ -58,7 +58,7 @@ namespace HedraLibrary.Components {
 
             rotation = owner.rotation.eulerAngles.z;
             Area = size.x * size.y;
-            Center = (Vector2)owner.position + collider.offset;
+            Center = collider.bounds.center;
         }
 
         public Box2D(BoxCollider2D collider) {
@@ -67,15 +67,16 @@ namespace HedraLibrary.Components {
             size = collider.size;
             rotation = owner.rotation.eulerAngles.z;
             Area = size.x * size.y;
-            Center = (Vector2)owner.position + collider.offset;
+            Center = collider.bounds.center;
         }
-
         void StoreCorners() {
+
+            Vector2 halfSize = size / 2f;
             Corners = new Vector2[4];
-            Corners[0] = Hedra.Rotate(Center, new Vector2(Center.x - Size.x / 2, Center.y + Size.y / 2), Rotation);
-            Corners[1] = Hedra.Rotate(Center, new Vector2(Center.x + Size.x / 2, Center.y + Size.y / 2), Rotation);
-            Corners[2] = Hedra.Rotate(Center, new Vector2(Center.x + Size.x / 2, Center.y - Size.y / 2), Rotation);
-            Corners[3] = Hedra.Rotate(Center, new Vector2(Center.x - Size.x / 2, Center.y - Size.y / 2), Rotation);
+            Corners[0] = Hedra.Rotate(Center, new Vector2(Center.x - halfSize.x, Center.y + halfSize.y), Rotation);
+            Corners[1] = Hedra.Rotate(Center, new Vector2(Center.x + halfSize.x, Center.y + halfSize.y), Rotation);
+            Corners[2] = Hedra.Rotate(Center, new Vector2(Center.x + halfSize.x, Center.y - halfSize.y), Rotation);
+            Corners[3] = Hedra.Rotate(Center, new Vector2(Center.x - halfSize.x, Center.y - halfSize.y), Rotation);
         }
 
         void StoreEdges() {
@@ -111,7 +112,7 @@ namespace HedraLibrary.Components {
         /// <param name="A">First point.</param>
         /// <param name="B">Second point.</param>
         /// <param name="onSegment">If true, point must be contained by the colliding segments (both collider edges and AB).</param>
-        /// <returns>The intersection points of a line or segment with the edges of a collider.</returns>
+        /// <returns>The intersection points of a line or segment with the edges of this box.</returns>
         public List<Vector2> IntersectionPoints(Vector2 A, Vector2 B, bool onSegment) {
             if (onSegment) {
                 Segment2D segment = new Segment2D(A, B);
@@ -123,30 +124,119 @@ namespace HedraLibrary.Components {
         }
         
         /// <summary>
-        /// Calculates the intersection point of the segment AB with this box.
+        /// Calculates the intersection point of a segment with this box.
         /// </summary>
         /// <param name="segment"></param>
-        /// <returns>The intersection points of a segment with the edges of a collider.</returns>
+        /// <returns>The intersection points of a segment with this box.</returns>
         public List<Vector2> IntersectionPoints(Segment2D segment) {
-            return IntersectionPoints((Line2D) segment);
+            List<Vector2> intersections = new List<Vector2>();
+
+            Vector2 point;
+            for (int i = 0; i < Edges.Length; i++) {
+                point = segment.IntersectionPoint(Edges[i]);
+                if (!float.IsNaN(point.x) && !float.IsInfinity(point.x) &&
+                    !float.IsNaN(point.y) && !float.IsInfinity(point.y)) {
+                    intersections.Add(point);
+                }
+            }
+
+            return intersections;
         }
 
         /// <summary>
-        /// Calculates the intersection point of the line AB with this box.
+        /// Calculates the intersection point of a line with this box.
         /// </summary>
         /// <param name="line"></param>
-        /// <returns>The intersection points of a line with the edges of a collider.</returns>
+        /// <returns>The intersection points of a line with the edges of this box.</returns>
         public List<Vector2> IntersectionPoints(Line2D line) {
             List<Vector2> intersections = new List<Vector2>();
 
             Vector2 point;
             for (int i = 0; i < Edges.Length; i++) {
                 point = line.IntersectionPoint(Edges[i]);
-                if (point.x != float.NaN && point.y != float.NaN) {
+                if (!float.IsNaN(point.x) && !float.IsInfinity(point.x) && 
+                    !float.IsNaN(point.y) && !float.IsInfinity(point.y)) {
                     intersections.Add(point);
                 }
             }
 
+            return intersections;
+        }
+        
+        /// <summary>
+        /// Returns the points of this box colliding with another box.
+        /// </summary>
+        /// <param name="box">The box to check.</param>
+        /// <returns>The points of this box colliding with another box.</returns>
+        public List<Vector2> IntersectionPoints(Box2D box) {
+            List<Vector2> intersections = new List<Vector2>();
+            for (int i = 0; i < Edges.Length; i++) {
+                intersections = intersections.Union(box.IntersectionPoints(Edges[i])).ToList();
+            }
+            return intersections;
+        }
+        
+        /// <summary>
+        /// Returns the edges of this box colliding with the line or segment formed by the points AB.
+        /// </summary>
+        /// <param name="A">First point.</param>
+        /// <param name="B">Second point.</param>
+        /// <param name="onSegment">If true, point must be contained by the colliding segments (both collider edges and AB).</param>
+        /// <returns>The edges of this box colliding with a line or segment.</returns>
+        public List<Segment2D> IntersectingEdges(Vector2 A, Vector2 B, bool onSegment) {
+            if (onSegment) {
+                Segment2D segment = new Segment2D(A, B);
+                return IntersectingEdges(segment);
+            } else {
+                Line2D line = new Segment2D(A, B);
+                return IntersectingEdges(line);
+            }
+        }
+        
+        /// <summary>
+        /// Returns the edges of this box colliding with a segment.
+        /// </summary>
+        /// <param name="segment">The segment to check.</param>
+        /// <returns>The edges of this box colliding with a segment.</returns>
+        public List<Segment2D> IntersectingEdges(Segment2D segment) {
+            List<Segment2D> intersections = new List<Segment2D>();
+
+            for (int i = 0; i < Edges.Length; i++) {
+                if (Edges[i].Intersects(segment)) {
+                    intersections.Add(Edges[i]);
+                }
+            }
+
+            return intersections;
+        }
+        
+        /// <summary>
+        /// Returns the edges of this box colliding with a line.
+        /// </summary>
+        /// <param name="line">The line to check.</param>
+        /// <returns>The edges of this box colliding with a line.</returns>
+        public List<Segment2D> IntersectingEdges(Line2D line) {
+            List<Segment2D> intersections = new List<Segment2D>();
+            
+            for (int i = 0; i < Edges.Length; i++) {
+                if (Edges[i].Intersects(line)) {
+                    intersections.Add(Edges[i]);
+                }
+            }
+
+            return intersections;
+        }
+        
+        /// <summary>
+        /// Returns the edges of this box colliding with another box.
+        /// </summary>
+        /// <param name="box">The box to check.</param>
+        /// <returns>The edges of this box colliding with another box.</returns>
+        public List<Segment2D> IntersectingEdges(Box2D box) {
+            List<Segment2D> intersections = new List<Segment2D>();
+            for (int i = 0; i < box.Edges.Length; i++) {
+                intersections = intersections.Union(IntersectingEdges(box.Edges[i])).ToList();
+            }
             return intersections;
         }
 
@@ -216,6 +306,73 @@ namespace HedraLibrary.Components {
         public Vector2 FurthestPointFrom(Vector2 point) {
             List<Vector2> perpendicularPoints = PerpendicularPointsTo(point);
             return Hedra.GetFurthestPoint(point, perpendicularPoints);
+        }
+
+        /// <summary>
+        /// Returns the closest corner of this box to another box.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>The closest corner of this box to another box.</returns>
+        public Vector2 ClosestCornerTo(Box2D other) {
+            return ClosestCornerTo(other.Center);
+        }
+
+        /// <summary>
+        /// Returns the closest corner of this box to a point.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>The closest corner of this box to a point.</returns>
+        public Vector2 ClosestCornerTo(Vector2 point) {
+            return Hedra.GetClosestPoint(point, Corners.ToList());
+        }
+
+        public List<Vector2> CornersInside(Box2D other) {
+            List<Vector2> containedCorners = new List<Vector2>();
+            for (int i = 0; i < Corners.Length; i++) {
+                if (other.Contains(Corners[i])) {
+                    containedCorners.Add(Corners[i]);
+                }
+            }
+            return containedCorners;
+        }
+
+        /// <summary>
+        /// Returns the closest corner of this box to another box.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>The closest corner of this box to another box.</returns>
+        public Vector2 DeepestCornerIn(Box2D other) {
+            List<Vector2> containedPoints = CornersInside(other);
+
+            Vector2 corner = new Vector2(float.NaN, float.NaN);
+            float greatestDistance = float.MinValue;
+            for (int i = 0; i < containedPoints.Count; i++) {
+                float distance = Vector2.Distance(containedPoints[i], other.ClosestPointTo(containedPoints[i]));
+                if (distance >= greatestDistance) {
+                    corner = containedPoints[i];
+                    greatestDistance = distance;
+                }
+            }
+
+            return corner;
+        }
+        
+        /// <summary>
+        /// Returns the furthest corner of this box to another box.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>The furthest corner of this box to another box.</returns>
+        public Vector2 FurthestCornerFrom(Box2D other) {
+            return FurthestCornerFrom(other.Center);
+        }
+
+        /// <summary>
+        /// Returns the furthest corner of this box to a point.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns>The furthest corner of this box to a point.</returns>
+        public Vector2 FurthestCornerFrom(Vector2 point) {
+            return Hedra.GetFurthestPoint(point, Corners.ToList());
         }
 
         /// <summary>
@@ -321,6 +478,7 @@ namespace HedraLibrary.Components {
             Gizmos.DrawLine(Corners[0], Corners[Corners.Length - 1]);
 
             if (!drawCorners) {
+                Gizmos.color = Color.white;
                 return;
             }
             Gizmos.color = Color.yellow;

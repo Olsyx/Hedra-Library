@@ -17,6 +17,23 @@ using UnityEngine.Networking;
 namespace HedraLibrary {
     public static partial class Hedra {
 
+
+        public static bool IsNaN (this Vector2 vector) {
+            return float.IsNaN(vector.x) || float.IsNaN(vector.y);
+        }
+
+        public static bool IsNaN(this Vector3 vector) {
+            return float.IsNaN(vector.x) || float.IsNaN(vector.y) || float.IsNaN(vector.z);
+        }
+
+        public static bool IsInfinity(this Vector2 vector) {
+            return float.IsInfinity(vector.x) || float.IsInfinity(vector.y);
+        }
+
+        public static bool IsInfinity(this Vector3 vector) {
+            return float.IsInfinity(vector.x) || float.IsInfinity(vector.y) || float.IsInfinity(vector.z);
+        }
+
         public static void DrawGizmos(this UnityEvent unityEvent, Transform self, Color color, float size) {
             ((UnityEventBase)unityEvent).DrawGizmos(self, color, size);
         }
