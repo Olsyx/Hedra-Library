@@ -16,6 +16,52 @@ namespace HedraLibrary {
     public static partial class Hedra {
 
         /// <summary>
+        /// Returns the same vector, its components turned to absolute values.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Vector2 Abs(Vector2 target) {
+            target.x = Mathf.Abs(target.x);
+            target.y = Mathf.Abs(target.y);
+            return target;
+        }
+
+        /// <summary>
+        /// Returns the same vector, its components turned to absolute values.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Vector3 Abs(Vector3 target) {
+            target.x = Mathf.Abs(target.x);
+            target.y = Mathf.Abs(target.y);
+            target.z = Mathf.Abs(target.z);
+            return target;
+        }
+
+        /// <summary>
+        /// Returns the same vector, each component casted to Integer.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Vector2 ParseInt(Vector2 target) {
+            target.x = (int)target.x;
+            target.y = (int)target.y;
+            return target;
+        }
+
+        /// <summary>
+        /// Returns the same vector, each component casted to Integer.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static Vector3 ParseInt(Vector3 target) {
+            target.x = (int)target.x;
+            target.y = (int)target.y;
+            target.z = (int)target.z;
+            return target;
+        }
+
+        /// <summary>
         /// Hard clamps the value to the nearest limit.
         /// </summary>
         /// <param name="value">Value to clamp.</param>

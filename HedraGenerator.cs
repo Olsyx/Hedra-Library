@@ -525,5 +525,128 @@ namespace HedraLibrary {
 
             return spiral;
         }
+
+        /// <summary>
+        /// Generates a matrix of 2D box colliders.
+        /// </summary>
+        /// <param name="space">The space that will contain the matrix. This will define the size of the cells.</param>
+        /// <param name="cells">Number of cells, represented as a vector. (3, 5) will generate a 3 cell wide, 5 cell high matrix.</param>
+        /// <param name="padding">Inner separation between the cells.</param>
+        /// <param name="margin">Matrix separation from the space boundaries.</param>
+        /// <returns>A list of already generated gameObjects with a 2D box collider.</returns>
+        public static List<BoxCollider2D> ColliderMatrix(BoxCollider2D space, Vector2 cells, Vector2 padding, Vector2 margin) {
+            Vector2 cellSize = space.size - margin * 2;
+            cellSize.x = (cellSize.x - padding.x * (cells.x - 1)) / cells.x;
+            cellSize.y = (cellSize.y - padding.y * (cells.y - 1)) / cells.y;
+
+            List<Vector2> positions = Matrix(space, cells, padding, margin);
+            List<BoxCollider2D> colliders = new List<BoxCollider2D>();
+            for (int i = 0; i < positions.Count; i++) {
+                GameObject box = new GameObject();
+                BoxCollider2D boxCollider = box.AddComponent<BoxCollider2D>();
+                boxCollider.size = cellSize;
+                boxCollider.transform.position = positions[i];
+                colliders.Add(boxCollider);
+            }
+
+            return colliders;
+        }
+
+        /// <summary>
+        /// Generates a matrix of points in space.
+        /// </summary>
+        /// <param name="space">The space that will contain the matrix. This will define the size of the cells.</param>
+        /// <param name="cells">Number of cells, represented as a vector. (3, 5) will generate a 3 cell wide, 1 cell deep matrix.</param>
+        /// <param name="padding">Inner separation between the cells.</param>
+        /// <param name="margin">Matrix separation from the space boundaries.</param>
+        /// <returns>A list of points.</returns>
+        public static List<Vector2> Matrix(BoxCollider2D space, Vector2 cells, Vector2 padding, Vector2 margin) {
+            cells = ParseInt(Abs(cells));
+            padding = Abs(padding);
+            margin = Abs(padding);
+
+            Vector2 cellSize = space.size - margin * 2;
+            cellSize.x = (cellSize.x - padding.x * (cells.x - 1)) / cells.x;
+            cellSize.y = (cellSize.y - padding.y * (cells.y - 1)) / cells.y;
+
+            Vector2 spacePosition = (Vector2) space.transform.position + space.offset;
+            Vector2 initialPosition = (spacePosition - space.size / 2) + margin + cellSize / 2;
+
+            List<Vector2> cellPositions = new List<Vector2>();
+            for (int i = 0; i < cells.x; i++) {
+                for (int j = 0; j < cells.y; j++) {
+                    Vector2 cellPosition = new Vector2(
+                        initialPosition.x + cellSize.x * i + padding.x * i,
+                        initialPosition.y + cellSize.y * j + padding.y * j);
+                    cellPositions.Add(cellPosition);                    
+                }
+
+            }
+            return cellPositions;
+        }
+
+        /// <summary>
+        /// Generates a matrix of box colliders.
+        /// </summary>
+        /// <param name="space">The space that will contain the matrix. This will define the size of the cells.</param>
+        /// <param name="cells">Number of cells, represented as a vector. (3, 5, 1) will generate a 3 cell wide, 5 cell high, 1 cell deep matrix.</param>
+        /// <param name="padding">Inner separation between the cells.</param>
+        /// <param name="margin">Matrix separation from the space boundaries.</param>
+        /// <returns>A list of already generated gameObjects with a box collider.</returns>
+        public static List<BoxCollider> ColliderMatrix(BoxCollider space, Vector3 cells, Vector3 padding, Vector3 margin) {
+            Vector3 cellSize = space.size - margin * 2;
+            cellSize.x = (cellSize.x - padding.x * (cells.x - 1)) / cells.x;
+            cellSize.y = (cellSize.y - padding.y * (cells.y - 1)) / cells.y;
+            cellSize.z = (cellSize.z - padding.z * (cells.z - 1)) / cells.z;
+
+            List<Vector3> positions = CubicMatrix(space, cells, padding, margin);
+            List<BoxCollider> colliders = new List<BoxCollider>();
+            for (int i = 0; i < positions.Count; i++) {
+                GameObject box = new GameObject();
+                BoxCollider boxCollider = box.AddComponent<BoxCollider>();
+                boxCollider.size = cellSize;
+                boxCollider.transform.position = positions[i];
+                colliders.Add(boxCollider);
+            }
+
+            return colliders;
+        }
+
+        /// <summary>
+        /// Generates a matrix of points in space.
+        /// </summary>
+        /// <param name="space">The space that will contain the matrix. This will define the size of the cells.</param>
+        /// <param name="cells">Number of cells, represented as a vector. (3, 5, 1) will generate a 3 cell wide, 5 cell high, 1 cell deep matrix.</param>
+        /// <param name="padding">Inner separation between the cells.</param>
+        /// <param name="margin">Matrix separation from the space boundaries.</param>
+        /// <returns>A list of points.</returns>
+        public static List<Vector3> CubicMatrix(BoxCollider space, Vector3 cells, Vector3 padding, Vector3 margin) {
+            cells = ParseInt(Abs(cells));
+            padding = Abs(padding);
+            margin = Abs(padding);
+
+            Vector3 cellSize = space.size - margin * 2;
+            cellSize.x = (cellSize.x - padding.x * (cells.x - 1)) / cells.x;
+            cellSize.y = (cellSize.y - padding.y * (cells.y - 1)) / cells.y;
+            cellSize.z = (cellSize.z - padding.z * (cells.z - 1)) / cells.z;
+
+            Vector3 spacePosition = space.transform.position + space.center;
+            Vector3 initialPosition = (spacePosition - space.size / 2) + margin + cellSize / 2;
+
+            List<Vector3> cellPositions = new List<Vector3>();
+            for (int i = 0; i < cells.x; i++) {
+                for (int j = 0; j < cells.y; j++) {
+                    for (int k = 0; k < cells.z; k++) {
+                        Vector3 cellPosition = new Vector3(
+                            initialPosition.x + cellSize.x * i + padding.x * i,
+                            initialPosition.y + cellSize.y * j + padding.y * j,
+                            initialPosition.z + cellSize.z * k + padding.z * k);
+                        cellPositions.Add(cellPosition);
+                    }
+                }
+
+            }
+            return cellPositions;
+        }
     }
 }

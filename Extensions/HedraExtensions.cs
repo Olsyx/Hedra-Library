@@ -44,6 +44,14 @@ namespace HedraLibrary {
             }
         }
 
+        public static void DrawWireCube(Vector3 center, Vector3 size, Quaternion rotation) {
+            Matrix4x4 cubeTransform = Matrix4x4.TRS(center, rotation, size);
+            Matrix4x4 oldGizmosMatrix = Gizmos.matrix;
+            Gizmos.matrix *= cubeTransform;
+            Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
+            Gizmos.matrix = oldGizmosMatrix;
+        }
+
         public static void DrawUnityEventRelation(Transform self, Transform other, float size) {
             if (self == other || self == other.parent) {
                 Gizmos.DrawWireSphere(self.position, size);
