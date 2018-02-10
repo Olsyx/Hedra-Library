@@ -155,7 +155,7 @@ namespace HedraLibrary {
         /// <param name="pointB">Second point.</param>
         /// <returns>The intersection points of a segment with the edges of a collider.</returns>
         public static List<Vector2> IntersectionPoints(Collider2D collider, Segment2D segment) {
-            Box2D box = new Box2D(collider);
+            Rectangle box = new Rectangle(collider);
             return box.IntersectionPoints(segment);
         }
 
@@ -167,7 +167,7 @@ namespace HedraLibrary {
         /// <param name="pointB">Second point.</param>
         /// <returns>The intersection points of a line with the edges of a collider.</returns>
         public static List<Vector2> IntersectionPoints(Collider2D collider, Line2D line) {
-            Box2D box = new Box2D(collider);
+            Rectangle box = new Rectangle(collider);
             return box.IntersectionPoints(line);
         }
 
@@ -178,7 +178,7 @@ namespace HedraLibrary {
         /// <param name="point"></param>
         /// <returns></returns>
         public static Vector2 ClosestPoint(Collider2D collider, Vector2 P) {
-            Box2D box = new Box2D(collider);
+            Rectangle box = new Rectangle(collider);
             return box.ClosestPointTo(P);
         }
 
@@ -189,7 +189,7 @@ namespace HedraLibrary {
         /// <param name="P"></param>
         /// <returns></returns>
         public static Vector2 FurthestPoint(Collider2D collider, Vector2 P) {
-            Box2D box = new Box2D(collider);
+            Rectangle box = new Rectangle(collider);
             return box.FurthestPointFrom(P);
         }
     }

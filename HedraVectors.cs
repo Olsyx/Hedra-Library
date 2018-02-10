@@ -156,7 +156,7 @@ namespace HedraLibrary {
         }
 
         /// <summary>
-        /// Returns the angle between points A and B from a provided origin of coordenates.
+        /// Returns the angle degrees between points A and B from a provided origin of coordenates.
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="A"></param>
@@ -170,7 +170,7 @@ namespace HedraLibrary {
         }
 
         /// <summary>
-        /// Returns the angle between vectors A and B.
+        /// Returns the angle degrees between vectors A and B.
         /// </summary>
         /// <param name="A"></param>
         /// <param name="B"></param>
@@ -181,7 +181,7 @@ namespace HedraLibrary {
         }
 
         /// <summary>
-        /// Returns the angle between points A and B from a provided origin of coordenates.
+        /// Returns the angle degrees between points A and B from a provided origin of coordenates.
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="A"></param>
@@ -195,7 +195,7 @@ namespace HedraLibrary {
         }
 
         /// <summary>
-        /// Returns the angle between vectors A and B.
+        /// Returns the angle degrees between vectors A and B.
         /// https://www.gamedev.net/forums/topic/509720-angle-between-two-3d-points/
         /// </summary>
         /// <param name="A"></param>

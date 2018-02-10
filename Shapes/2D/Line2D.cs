@@ -111,7 +111,7 @@ namespace HedraLibrary.Components {
         // Line points
         public Vector2 PointA { get; protected set; }
         public Vector2 PointB { get; protected set; }
-        public Vector2 Direction { get; protected set; }
+        public Vector2 Vector { get; protected set; }
 
         public LineEquation Equation { get; protected set; }
         public SlopeInterceptEquation SlopeEquation { get; protected set; }
@@ -119,11 +119,33 @@ namespace HedraLibrary.Components {
         public Line2D(Vector2 pointA, Vector2 pointB) {
             this.PointA = pointA;
             this.PointB = pointB;
-            Direction = this.PointB - this.PointA;
+            Vector = this.PointB - this.PointA;
             Equation = new LineEquation(PointA, PointB);
             SlopeEquation = new SlopeInterceptEquation(PointA, PointB);
         }
+        
+        /// <summary>
+        /// Returns true if the point is contained in this line.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public virtual bool Contains(Vector2 point) {
+            Vector2 AP = point - PointA;
+            float cross = AP.x * Vector.y - AP.y * Vector.x;
+            return (cross == 0);
+        }
 
+        /// <summary>
+        /// Returns true if the point is contained in this segment or as close as a given margin.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public virtual bool Contains(Vector2 point, float margin) {
+            float distance = Vector2.Distance(PerpendicularPoint(point), point);
+
+            return Contains(point) || distance <= margin;
+        }
+        
         public virtual bool Intersects(Vector2 A, Vector2 B, bool onSegment) {
             if (onSegment) {
                 Segment2D segment = new Segment2D(A, B);
@@ -133,16 +155,66 @@ namespace HedraLibrary.Components {
                 return Intersects(line);
             }
         }
-
-
+        
         public virtual bool Intersects(Segment2D segment) {
             Vector2 point = IntersectionPoint(segment);
-            return !point.IsNaN() && !point.IsInfinity();
+            return !point.IsNaN() && !point.IsInfinity() && Contains(point) && segment.Contains(point);
         }
         
         public virtual bool Intersects(Line2D line) {
             Vector2 point = IntersectionPoint(line);
             return !point.IsNaN() && !point.IsInfinity();
+        }
+
+        public virtual Vector2 GetPoint(float distance) {
+            return PointA + Vector.normalized * distance;
+        }
+
+        /// <summary>
+        /// Returns the unsigned shortest distance from a point to this line. Also called triangle height.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public float PerpendicularDistance(Vector2 point) {
+            float a = (PointB - point).magnitude;
+
+            Vector2 BP = point - PointB;
+            Vector2 BA = -Vector;
+            float angleB = Hedra.Angle(BP, BA) * Mathf.Deg2Rad;
+
+            float height = a * Mathf.Sin(angleB);
+            return Mathf.Abs(height);
+        }
+
+        /// <summary>
+        /// Returns the distance from the point A of this line to the intersecting perpendicular point relative to a given point.
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public float PerpendicularBase(Vector2 point) {
+            // Pythagoras theorem: h2 = a2 + b2
+            Vector2 AP = point - PointA;
+
+            float hypotenuse = AP.magnitude;
+            float perpendicularDistance = PerpendicularDistance(point);
+
+            float baseIntersectionLength = Mathf.Sqrt(Mathf.Pow(hypotenuse, 2) - Mathf.Pow(perpendicularDistance, 2));
+            float sign = Hedra.HardClamp(Vector2.Dot(AP.normalized, Vector.normalized), -1, 1);
+            return baseIntersectionLength * sign;
+        }
+
+        /// <summary>
+        /// Returns the point of intersection of the perpendicular from a point to this line.
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public virtual Vector2 PerpendicularPoint(Vector2 point) {
+            float triangleBase = PerpendicularBase(point);
+            return PointA + Vector.normalized * triangleBase;
         }
 
         /// <summary>
@@ -184,29 +256,6 @@ namespace HedraLibrary.Components {
         }
 
         /// <summary>
-        /// Returns true if the point is contained in this line.
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        public virtual bool Contains(Vector2 point) {
-            Vector2 AP = point - PointA;
-            float cross = AP.x * Direction.y - AP.y * Direction.x;
-            return (cross == 0);
-        }
-
-        /// <summary>
-        /// Returns true if the point is contained in this segment or as close as a given margin.
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        public virtual bool Contains(Vector2 point, float margin) {
-            float distance = Vector2.Distance(PerpendicularPoint(point), point);
-
-            return Contains(point) || distance <= margin;
-        }
-
-
-        /// <summary>
         /// Returns the situation of the point regarding this line or segment.
         /// </summary>
         /// <param name="point"></param>
@@ -214,18 +263,17 @@ namespace HedraLibrary.Components {
         public virtual float GetPointSituation(Vector2 point) {
             return Equation.GetPointSituation(point);
         }
-
-        /// <summary>
-        /// Returns the intersection point of this line with a perpendicular line casted from the given point.
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        public virtual Vector2 PerpendicularPoint(Vector2 point) {
-            return Hedra.PerpendicularPoint(PointA, PointB, point);
-        }
-
+        
         public override string ToString() {
             return Equation.ToString() + " | " + SlopeEquation.ToString();
+        }
+        
+        public virtual void DrawGizmos(bool drawPoints, float size = 0.2f) {
+            Gizmos.DrawLine(PointA, PointB);
+            if (drawPoints) {
+                Gizmos.DrawWireSphere(PointA, size / 3);
+                Gizmos.DrawWireSphere(PointB, size);
+            }
         }
     }
 }

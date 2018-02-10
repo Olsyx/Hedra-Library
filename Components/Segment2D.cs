@@ -7,13 +7,27 @@ namespace HedraLibrary.Components {
 
     public class Segment2D : Line2D {
 
-        public Vector2 Center { get; protected set; }
+        public Vector2 MiddlePoint { get; protected set; }
 
         public Segment2D(Vector2 pointA, Vector2 pointB) : base(pointA, pointB) {
-            Center = Hedra.MidPoint(pointA, pointB);
+            MiddlePoint = Hedra.MidPoint(pointA, pointB);
         }
-        
 
+        /// <summary>
+        /// Returns true if the point is contained in this segment.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public override bool Contains(Vector2 point) {
+            float value = Vector2.Distance(PointA, point) + Vector2.Distance(point, PointB) - Vector2.Distance(PointA, PointB);
+            return -EPSILON < value && value < EPSILON;
+        }
+
+        /// <summary>
+        /// Calculates the intersection point of this segment with the segment AB.
+        /// </summary>
+        /// <param name="other">The line to intersect with this one.</param>
+        /// /// <returns></returns>
         public override Vector2 IntersectionPoint(Vector2 pointA, Vector2 pointB) {
             Segment2D segment = new Segment2D(pointA, pointB);
             return this.IntersectionPoint(segment);
@@ -57,24 +71,26 @@ namespace HedraLibrary.Components {
         }
 
         /// <summary>
-        /// Returns true if the point is contained in this segment.
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        public override bool Contains(Vector2 point) {
-            float value = Vector2.Distance(PointA, point) + Vector2.Distance(point, PointB) - Vector2.Distance(PointA, PointB);
-            return -EPSILON < value && value < EPSILON;
-        }
-        
-
-        /// <summary>
         /// Returns the intersection point of this segment with a perpendicular line casted from the given point, 
         /// or the closest if the intersection would not be on segment.
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
         public override Vector2 PerpendicularPoint(Vector2 point) {
-            return Hedra.ClosestPointOnSegment(PointA, PointB, point);
+            float triangleBase = PerpendicularBase(point);
+            Vector2 intersectionPoint = GetPoint(triangleBase);
+
+            Vector2 AP = intersectionPoint - PointA;
+            if (Vector2.Dot(Vector, AP) < 0f) {
+                return PointA;
+            }
+
+            Vector2 BP = intersectionPoint - PointB;
+            if (Vector2.Dot(-Vector, BP) < 0f) {
+                return PointB;
+            }
+
+            return intersectionPoint;
         }
 
         public Vector2[] ToArray() {
@@ -83,6 +99,15 @@ namespace HedraLibrary.Components {
 
         public override string ToString() {
             return "[" + PointA + ", " + PointB + "]";
+        }
+        
+        public override void DrawGizmos(bool drawPoints, float size = 0.2f) {
+            Gizmos.DrawLine(PointA, PointB);
+            if (drawPoints) {
+                Gizmos.DrawWireSphere(PointA, size);
+                Gizmos.DrawWireSphere(PointB, size);
+                Gizmos.DrawWireSphere(MiddlePoint, size);
+            }
         }
     }
 }
