@@ -9,8 +9,10 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using HedraLibrary.Components;
+using HedraLibrary.Shapes;
+using HedraLibrary.Shapes.Polygons;
 using UnityEngine;
+using System.Linq;
 
 namespace HedraLibrary {
     public static partial class Hedra {
@@ -155,8 +157,8 @@ namespace HedraLibrary {
         /// <param name="pointB">Second point.</param>
         /// <returns>The intersection points of a segment with the edges of a collider.</returns>
         public static List<Vector2> IntersectionPoints(Collider2D collider, Segment2D segment) {
-            Rectangle box = new Rectangle(collider);
-            return box.IntersectionPoints(segment);
+            Polygon polygon = PolygonManager.Create2D(collider);
+            return polygon.IntersectionPoints(segment);
         }
 
         /// <summary>
@@ -167,30 +169,65 @@ namespace HedraLibrary {
         /// <param name="pointB">Second point.</param>
         /// <returns>The intersection points of a line with the edges of a collider.</returns>
         public static List<Vector2> IntersectionPoints(Collider2D collider, Line2D line) {
-            Rectangle box = new Rectangle(collider);
-            return box.IntersectionPoints(line);
+            Polygon polygon = PolygonManager.Create2D(collider);
+            return polygon.IntersectionPoints(line);
         }
 
         /// <summary>
-        /// Returns the closest point of a collider to P.
+        /// Sorts a list of points around a center.
         /// </summary>
-        /// <param name="collider"></param>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        public static Vector2 ClosestPoint(Collider2D collider, Vector2 P) {
-            Rectangle box = new Rectangle(collider);
-            return box.ClosestPointTo(P);
+        /// <param name="center"></param>
+        /// <param name="points"></param>
+        /// <param name="clockwise"></param>
+        /// <returns>Returns a sorted list of points around a center.</returns>
+        public static List<Vector2> SortAroundCenter(Vector2 center, List<Vector2> points, bool clockwise) {
+            List<Vector2> sortedPoints = null;
+            sortedPoints = Hedra.Copy(points);
+
+            sortedPoints.Sort((v1, v2) => { 
+                float angle1 = Hedra.Angle(center, center + Vector2.up, v1);
+                float angle2 = Hedra.Angle(center, center + Vector2.up, v2);
+
+                if (angle1 > angle2) {
+                    return 1;
+                } else if (angle1 == angle2) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+                
+            });
+
+            return sortedPoints;
         }
 
         /// <summary>
-        /// Returns the furthest point of a collider from P.
+        /// Sorts a list of points around a center.
         /// </summary>
-        /// <param name="collider"></param>
-        /// <param name="P"></param>
-        /// <returns></returns>
-        public static Vector2 FurthestPoint(Collider2D collider, Vector2 P) {
-            Rectangle box = new Rectangle(collider);
-            return box.FurthestPointFrom(P);
+        /// <param name="center"></param>
+        /// <param name="points"></param>
+        /// <param name="clockwise"></param>
+        /// <returns>Returns a sorted list of points around a center.</returns>
+        public static Vector2[] SortAroundCenter(Vector2 center, Vector2[] points, bool clockwise) {
+            List<Vector2> sortedPoints = null;
+            sortedPoints = Hedra.Copy(points.ToList());
+
+            sortedPoints.Sort((v1, v2) => {
+                float angle1 = Hedra.Angle(center, center + Vector2.left, v1);
+                float angle2 = Hedra.Angle(center, center + Vector2.left, v2);
+
+                if (angle1 > angle2) {
+                    return 1;
+                } else if (angle1 == angle2) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+
+            });
+
+            return sortedPoints.ToArray();
         }
+
     }
 }

@@ -10,10 +10,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using HedraLibrary.Components;
+using HedraLibrary.Shapes;
 using UnityEngine;
 
 namespace HedraLibrary {
     public static partial class Hedra {
+        
+        /// <summary>
+        /// Returns a Random Vector in the [-1, 1] value range.
+        /// </summary>
+        /// <returns></returns>
+        public static Vector3 RandomVector() {
+            return RandomVector(-1000f, 1000f) / 1000f; 
+        }
+
+        /// <summary>
+        /// Returns a Random Vector in the given value range.
+        /// </summary>
+        /// <returns></returns>
+        public static Vector3 RandomVector(float minValue, float maxValue) {
+            Vector3 vector;
+            vector.x = UnityEngine.Random.Range(minValue, maxValue);
+            vector.y = UnityEngine.Random.Range(minValue, maxValue);
+            vector.z = UnityEngine.Random.Range(minValue, maxValue);
+            return vector;
+        }
 
         /// <summary>
         /// Returns a point P on vector AB at given distance from A.
@@ -104,6 +125,50 @@ namespace HedraLibrary {
         }
 
         /// <summary>
+        /// Returns the bisector of vectors A and B.
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <returns></returns>
+        public static Vector2 Bisector(Vector2 A, Vector2 B) {
+            Vector2 midPoint = MidPoint(A, B);
+            return midPoint;
+        } 
+        
+        /// <summary>
+        /// Returns the bisector of vectors A and B from origin O.
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <returns></returns>
+        public static Vector2 Bisector(Vector2 O, Vector2 A, Vector2 B) {
+            Vector2 midPoint = MidPoint(A, B);
+            return midPoint - O;
+        } 
+        
+        /// <summary>
+          /// Returns the bisector of vectors A and B.
+          /// </summary>
+          /// <param name="A"></param>
+          /// <param name="B"></param>
+          /// <returns></returns>
+        public static Vector3 Bisector(Vector3 A, Vector3 B) {
+            Vector3 midPoint = MidPoint(A, B);
+            return midPoint;
+        }
+
+        /// <summary>
+        /// Returns the bisector of vectors A and B from origin O.
+        /// </summary>
+        /// <param name="A"></param>
+        /// <param name="B"></param>
+        /// <returns></returns>
+        public static Vector3 Bisector(Vector3 O, Vector3 A, Vector3 B) {
+            Vector3 midPoint = MidPoint(A, B);
+            return midPoint - O;
+        }
+
+        /// <summary>
         /// Returns the points obtained from subdividing the AB vector, including both A and B.
         /// </summary>
         /// <param name="A">Origin of the vector.</param>
@@ -176,8 +241,11 @@ namespace HedraLibrary {
         /// <param name="B"></param>
         /// <returns></returns>
         public static float Angle(Vector2 A, Vector2 B) {
-            float angle = Mathf.Atan2(A.y, A.x) - Mathf.Atan2(B.y, B.x);
-            return angle * Mathf.Rad2Deg;
+            float angle = Mathf.Atan2(B.y, B.x) - Mathf.Atan2(A.y, A.x);
+            angle *= Mathf.Rad2Deg;
+            angle = (angle > 180f) ? angle - 360f : angle;
+            angle = (angle < -180f) ? angle + 360f : angle;
+            return angle;
         }
 
         /// <summary>
@@ -188,8 +256,8 @@ namespace HedraLibrary {
         /// <param name="B"></param>
         /// <returns></returns>
         public static float Angle(Vector3 origin, Vector3 A, Vector3 B) {
-            Vector2 pointA = A - origin;
-            Vector2 pointB = B - origin;
+            Vector3 pointA = A - origin;
+            Vector3 pointB = B - origin;
 
             return Angle(pointA, pointB);
         }
@@ -202,11 +270,23 @@ namespace HedraLibrary {
         /// <param name="B"></param>
         /// <returns></returns>
         public static float Angle(Vector3 A, Vector3 B) {
-            float dotAB = Vector3.Dot(A, B);
-            float lengthsCombined = A.magnitude * B.magnitude;
+            Vector3 a = A.normalized;
+            Vector3 b = B.normalized;
 
-            float angle = Mathf.Acos(dotAB / lengthsCombined);
-            return angle * Mathf.Rad2Deg;
+            Vector3 perpendicular = Vector3.Cross(a, b).normalized;
+            Vector3 normal = Hedra.Abs(perpendicular);
+
+            // atan2((Vb x Va).Vn, Va.Vb) - https://stackoverflow.com/questions/5188561/signed-angle-between-two-3d-vectors-with-same-origin-within-the-same-plane
+            return Mathf.Atan2(Vector3.Dot(perpendicular, normal), Vector3.Dot(a, b)) * Mathf.Rad2Deg;
+        }
+
+        public static float Angle(Segment2D a, Segment2D b) {
+            if (a.Intersects(b)) {
+                return Angle(a.IntersectionPoint(b), a.Vector, b.Vector);
+            }
+
+            Vector2 origin = a.ToLine().IntersectionPoint(b.ToLine());
+            return Angle(origin, a.Vector, b.Vector);
         }
 
         /// <summary>

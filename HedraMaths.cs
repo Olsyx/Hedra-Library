@@ -14,6 +14,67 @@ using UnityEngine;
 
 namespace HedraLibrary {
     public static partial class Hedra {
+        /// <summary>
+        /// Rounds a number to a number of decimal places.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <returns></returns>
+        public static float RoundDecimals(float value, int digits) {
+            float mult = Mathf.Pow(10.0f, (float)digits);
+            return Mathf.Round(value * mult) / mult;
+        }
+        
+        /// <summary>
+        /// Rounds a Vector coordinates to a number of decimal places.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <returns></returns>
+        public static Vector2 Round(Vector2 value, int digits) {
+            return new Vector2(RoundDecimals(value.x, digits), RoundDecimals(value.y, digits));
+        }
+
+        /// <summary>
+        /// Rounds a Vector coordinates to a number of decimal places.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <returns></returns>
+        public static Vector3 Round(Vector3 value, int digits) {
+            return new Vector3(RoundDecimals(value.x, digits), RoundDecimals(value.y, digits), RoundDecimals(value.z, digits));
+        }
+        /// <summary>
+        /// Truncates a number to a number of decimal places.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <returns></returns>
+
+        public static float Truncate(float value, int digits) {
+            float mult = Mathf.Pow(10.0f, (float)digits);
+            return ((int)(value * mult)) / mult;
+        }
+
+        /// <summary>
+        /// Truncates a Vector to a number of decimal places.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <returns></returns>
+        public static Vector2 Truncate(Vector2 value, int digits) {
+            return new Vector2(Truncate(value.x, digits), Truncate(value.y, digits));
+        }
+
+        /// <summary>
+        /// Truncates a Vector to a number of decimal places.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="digits"></param>
+        /// <returns></returns>
+        public static Vector3 Truncate(Vector3 value, int digits) {
+            return new Vector3(Truncate(value.x, digits), Truncate(value.y, digits), Truncate(value.z, digits));
+        }
 
         /// <summary>
         /// Returns the same vector, its components turned to absolute values.
@@ -60,6 +121,28 @@ namespace HedraLibrary {
             target.z = (int)target.z;
             return target;
         }
+        
+        /// <summary>
+        /// Clamps the value to range bounds.
+        /// </summary>
+        /// <param name="value">Value to clamp.</param>
+        /// <param name="upperLimit"></param>
+        /// <param name="bottomLimit"></param>
+        /// <returns></returns>
+        public static int Clamp(int value, int bottomLimit, int upperLimit) {
+            return Mathf.Max(Mathf.Min(value, upperLimit), bottomLimit);
+        }
+
+        /// <summary>
+        /// Clamps the value to range bounds.
+        /// </summary>
+        /// <param name="value">Value to clamp.</param>
+        /// <param name="upperLimit"></param>
+        /// <param name="bottomLimit"></param>
+        /// <returns></returns>
+        public static float Clamp(float value, float bottomLimit, float upperLimit) {
+            return Mathf.Max(Mathf.Min(value, upperLimit), bottomLimit);
+        }
 
         /// <summary>
         /// Hard clamps the value to the nearest limit.
@@ -69,7 +152,7 @@ namespace HedraLibrary {
         /// <param name="bottomLimit"></param>
         /// <returns></returns>
         public static int HardClamp(int value, int bottomLimit, int upperLimit) {
-            return (int)HardClamp(value, bottomLimit, upperLimit);
+            return (int)HardClamp((float)value, bottomLimit, upperLimit);
         }
 
         /// <summary>
@@ -97,7 +180,7 @@ namespace HedraLibrary {
         /// <param name="bottomLimit"></param>
         /// <returns></returns>
         public static int HardClamp(int value, int bottomLimit, int centerLimit, int upperLimit) {
-            return (int)HardClamp(value, bottomLimit, centerLimit, upperLimit);
+            return (int)HardClamp((float)value, bottomLimit, centerLimit, upperLimit);
         }
 
         /// <summary>
@@ -176,6 +259,17 @@ namespace HedraLibrary {
         }
 
         /// <summary>
+        /// Clamps a given angle in degrees into the range [0, 360]
+        /// </summary>
+        /// <param name="degrees"></param>
+        /// <returns></returns>
+        public static Vector3 ClampAngle(Vector3 angular) {
+            return new Vector3(ClampAngle(angular.x),
+                               ClampAngle(angular.y),
+                               ClampAngle(angular.z));
+        }
+
+        /// <summary>
         /// Turns negative angles in degrees into the range [0, 360]. Angles higher than 360 are not clamped.
         /// </summary>
         /// <param name="degrees"></param>
@@ -186,6 +280,17 @@ namespace HedraLibrary {
             }
 
             return ClampAngle(degrees);
+        }
+
+        /// <summary>
+        /// Clamps a given angle in degrees into the range [0, 360]
+        /// </summary>
+        /// <param name="degrees"></param>
+        /// <returns></returns>
+        public static Vector3 ClampNegativeAngle(Vector3 angular) {
+            return new Vector3(ClampNegativeAngle(angular.x),
+                               ClampNegativeAngle(angular.y),
+                               ClampNegativeAngle(angular.z));
         }
 
         /// <summary>
@@ -278,5 +383,152 @@ namespace HedraLibrary {
             return results;
         }
 
+        public static float[] CubicFormula(float A, float B, float C, float D) {
+            const float epsilon = 1e-9f;
+            // Quadratic Equation Form => Ax^3 + Bx^2 + Cx + D = 0
+            // Solving x = https://math.vanderbilt.edu/schectex/courses/cubic/cubic.gif
+            // Solution from: https://github.com/forrestthewoods/lib_fts/blob/master/code/fts_ballistic_trajectory.cs
+
+            if (A == 0) {
+                return QuadraticFormula(A, B, C);
+            }
+
+            float[] results;
+
+            // To eliminate quadric term, substitute x = y - A/3  ===> (x^3 + px + q = 0)
+            float sq_A = A * A;
+            float p = (-sq_A / 3f + B) / 3f;
+            float q = ((2f * A * sq_A) / 27f - (A * B) / 3f + C) / 2f;
+            
+            if (D > epsilon) {  // One solution
+                results = new float[1];
+
+                float sqrt_D = (float) System.Math.Sqrt(D);
+                float u = (float)System.Math.Pow(sqrt_D - q, 1.0 / 3.0);
+                float v = (float)-System.Math.Pow(sqrt_D + q, 1.0 / 3.0);
+
+                results[0] = u + v;
+
+            } else if (D < epsilon) {  // Three real solutions
+                results = new float[3];
+                
+                float cb_p = p * p * p; // Cardano's formula
+                float phi = (float)System.Math.Acos(-q / System.Math.Sqrt(-cb_p)) / 3f;
+                float t = 2f * (float)System.Math.Sqrt(-p);
+
+                results[0] = t * (float)System.Math.Cos(phi);
+                results[1] = -t * (float)System.Math.Cos(phi + System.Math.PI / 3);
+                results[2] = -t * (float)System.Math.Cos(phi - System.Math.PI / 3);
+                
+            } else if (q >= -epsilon && q <= epsilon) { // One triple solution
+                results = new float[1];
+                results[0] = 0f;
+
+            } else { // One single and one double solution
+                float u = (float)System.Math.Pow(-q, 1.0 / 3.0);
+                results = new float[2];
+                results[0] = 2 * u;
+                results[1] = -u;
+            }
+
+            // Resubstitute
+            float sub = A / 3f; 
+
+            if (results.Length > 0) results[0] -= sub;
+            if (results.Length > 1) results[1] -= sub;
+            if (results.Length > 2) results[2] -= sub;
+            
+            return results;
+        }
+
+        public static float[] QuarticFormula(float A, float B, float C, float D, float E) {
+            const float epsilon = 1e-9f;
+            // Quartic Equation Form => Ax^4 + Bx^3 + Cx^2 + Dx + E = 0
+            // Solution from: https://github.com/forrestthewoods/lib_fts/blob/master/code/fts_ballistic_trajectory.cs
+
+            float[] results;
+
+            // To eliminate cubic term, substitute x = y - A/4 ===> (x^4 + px^2 + qx + r = 0)
+            float sq_A = A * A;
+            float p = (-3.0f * sq_A) / 8f + B;
+            float q = (sq_A * A) / 8f - (A * B) / 2f + C;
+            float r = (-3.0f * sq_A * sq_A) / 256f + (sq_A * B) / 16f - (A * C) / 4f + D;
+
+            if (r >= -epsilon && r <= epsilon) {
+                // No absolute term: y(y^3 + py + q) = 0
+                results = CubicFormula(1, 0, p, q);
+
+            } else {
+                float s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+
+                results = CubicFormula( (r * p) / 2f - (q * q) / 8f, 
+                                        -r, 
+                                        -p/2f,
+                                        1
+                                      );
+
+                float z = results[0];
+                s1 = results[1];
+                s2 = results[2];
+
+                float u = z * z - r;
+                float v = 2 * z - p;
+
+                if (u >= -epsilon && u <= epsilon) {
+                    u = 0;
+                } else if (u > 0) {
+                    u = Mathf.Sqrt(u);
+                } else {
+                    return null;
+                }
+
+                if (v >= -epsilon && v <= epsilon) {
+                    v = 0;
+                } else if (u > 0) {
+                    v = Mathf.Sqrt(v);
+                } else {
+                    return null;
+                }
+
+                results = QuadraticFormula ( 1,
+                                             q < 0 ? -v : v,
+                                             z - u
+                                           );
+
+                float c0 = 1;
+                float c1 = q < 0 ? v : v;
+                float c2 = z + u;
+                
+                if (results.Length == 0) {
+                    results = QuadraticFormula(c0, c1, c2);
+                    s0 = results[0];
+                    s1 = results[1];
+                }
+
+                if (results.Length == 1) {
+                    results = QuadraticFormula(c0, c1, c2);
+                    s1 = results[0];
+                    s2 = results[1];
+                }
+
+                if (results.Length == 2) {
+                    results = QuadraticFormula(c0, c1, c2);
+                    s2 = results[0];
+                    s3 = results[1];
+                }
+
+                results = new float[4] { s0, s1, s2, s3 };
+            }
+
+            // Resubstitute
+            float sub = A / 4f;
+
+            if (results.Length > 0) results[0] -= sub;
+            if (results.Length > 1) results[1] -= sub;
+            if (results.Length > 2) results[2] -= sub;
+            if (results.Length > 3) results[3] -= sub;
+
+            return results;
+        }
     }
 }

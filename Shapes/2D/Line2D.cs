@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HedraLibrary.Components {
+namespace HedraLibrary.Shapes {
     public struct SlopeInterceptEquation {
 
         // Slope-Intercept line equation y = mx + b.
@@ -18,8 +18,8 @@ namespace HedraLibrary.Components {
             Vector2 direction = pointB - pointA;
             if (direction.y == 0) {
                 M = 0;
-            } else {
-                M = direction.y / direction.x;
+            } else { 
+                M = Hedra.RoundDecimals(direction.y, 3) / Hedra.RoundDecimals(direction.x, 3);
             }
             B = pointA.y - M * pointA.x;
         }
@@ -112,6 +112,12 @@ namespace HedraLibrary.Components {
         public Vector2 PointA { get; protected set; }
         public Vector2 PointB { get; protected set; }
         public Vector2 Vector { get; protected set; }
+        public Vector2[] Normals {
+            get {
+                return new Vector2[] { new Vector2(-Vector.y, Vector.x).normalized,
+                                       new Vector2(Vector.y, -Vector.x).normalized };
+            }
+        }
 
         public LineEquation Equation { get; protected set; }
         public SlopeInterceptEquation SlopeEquation { get; protected set; }
@@ -123,7 +129,51 @@ namespace HedraLibrary.Components {
             Equation = new LineEquation(PointA, PointB);
             SlopeEquation = new SlopeInterceptEquation(PointA, PointB);
         }
-        
+
+        public Line2D(Line2D original) {
+            this.PointA = original.PointA;
+            this.PointB = original.PointB;
+            Init();
+        }
+
+        #region Init
+        protected virtual void Init() {
+            Vector = this.PointB - this.PointA;
+            Equation = new LineEquation(PointA, PointB);
+            SlopeEquation = new SlopeInterceptEquation(PointA, PointB);
+        }
+
+        #endregion
+
+        #region Control
+        public virtual void Translate(Vector2 direction) {
+            this.PointA = PointA + direction;
+            this.PointB = PointB + direction;
+            Init();
+        }
+
+        public virtual void Rotate(Vector2 pivotPoint, float degrees) {
+            PointA = Hedra.Rotate(pivotPoint, PointA, degrees);
+            PointB = Hedra.Rotate(pivotPoint, PointB, degrees);
+            Init();
+        }
+
+        public virtual Vector2 GetPoint(float distance) {
+            return PointA + Vector.normalized * distance;
+        }
+
+        /// <summary>
+        /// Returns the situation of the point regarding this line or segment.
+        /// </summary>
+        /// <param name="point"></param>
+        /// <returns> > 0, left; 0, on the line; < 0, right.</returns>
+        public virtual float GetPointSituation(Vector2 point) {
+            return Equation.GetPointSituation(point);
+        }
+
+        #endregion
+
+        #region Consults
         /// <summary>
         /// Returns true if the point is contained in this line.
         /// </summary>
@@ -146,6 +196,25 @@ namespace HedraLibrary.Components {
             return Contains(point) || distance <= margin;
         }
         
+        /// <summary>
+        /// Returns true if the given line is contained in this line.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public virtual bool Contains(Line2D other) {
+            return IsParallelTo(other) && this.Contains(other.PointA);
+        }
+
+        /// <summary>
+        /// Checks if this line is parallel to the given line.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public virtual bool IsParallelTo(Line2D other) {
+            float scalarProduct = Vector2.Dot(Vector, other.Vector);
+            return scalarProduct / (Vector.magnitude * other.Vector.magnitude) > 1 - EPSILON;
+        }
+
         public virtual bool Intersects(Vector2 A, Vector2 B, bool onSegment) {
             if (onSegment) {
                 Segment2D segment = new Segment2D(A, B);
@@ -165,11 +234,9 @@ namespace HedraLibrary.Components {
             Vector2 point = IntersectionPoint(line);
             return !point.IsNaN() && !point.IsInfinity();
         }
+        #endregion
 
-        public virtual Vector2 GetPoint(float distance) {
-            return PointA + Vector.normalized * distance;
-        }
-
+        #region Intersections
         /// <summary>
         /// Returns the unsigned shortest distance from a point to this line. Also called triangle height.
         /// </summary>
@@ -254,16 +321,9 @@ namespace HedraLibrary.Components {
             Vector2 point = new Vector2(x, y);
             return point;
         }
-
-        /// <summary>
-        /// Returns the situation of the point regarding this line or segment.
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns> > 0, left; 0, on the line; < 0, right.</returns>
-        public virtual float GetPointSituation(Vector2 point) {
-            return Equation.GetPointSituation(point);
-        }
         
+        #endregion
+
         public override string ToString() {
             return Equation.ToString() + " | " + SlopeEquation.ToString();
         }
@@ -274,6 +334,9 @@ namespace HedraLibrary.Components {
                 Gizmos.DrawWireSphere(PointA, size / 3);
                 Gizmos.DrawWireSphere(PointB, size);
             }
+
+            Gizmos.DrawLine(PointA, PointA + Vector * 1000);
+            Gizmos.DrawLine(PointB, PointB - Vector * 1000);
         }
     }
 }
