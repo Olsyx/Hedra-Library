@@ -9,7 +9,8 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using HedraLibrary.Components;
+using HedraLibrary.Shapes;
+using HedraLibrary.Shapes.Polygons;
 using UnityEngine;
 using System.Linq;
 
@@ -44,16 +45,7 @@ namespace HedraLibrary {
             Vector2 boxSize = new Vector2(collider.bounds.size.x, collider.bounds.size.y);
             return Physics2D.OverlapBoxAll(position, boxSize, 0f, mask);
         }
-
-        public static Collider2D[] CheckCollisionAt(Rectangle rectangle, LayerMask mask) {
-            return Physics2D.OverlapBoxAll(rectangle.Center, rectangle.Size, rectangle.Rotation, mask);
-        }
-
-        public static Collider2D[] CheckCollisionAt(Vector2 position, Rectangle rectangle, LayerMask mask) {
-            return Physics2D.OverlapBoxAll(position, rectangle.Size, rectangle.Rotation, mask);
-        }
-
-
+        
         static void PrintColliders(Collider2D[] colliders) {
             string s = "Colliders: ";
             foreach (Collider2D target in colliders) {

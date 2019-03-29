@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HedraLibrary.Components {
+namespace HedraLibrary.Shapes {
 
     public class Ellipse2D {
 

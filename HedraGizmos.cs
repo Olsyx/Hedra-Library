@@ -10,6 +10,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
@@ -17,40 +18,6 @@ using UnityEngine.Networking;
 namespace HedraLibrary {
     public static partial class Hedra {
         
-        public static bool IsNaN (this Vector2 vector) {
-            return float.IsNaN(vector.x) || float.IsNaN(vector.y);
-        }
-
-        public static bool IsNaN(this Vector3 vector) {
-            return float.IsNaN(vector.x) || float.IsNaN(vector.y) || float.IsNaN(vector.z);
-        }
-
-        public static bool IsInfinity(this Vector2 vector) {
-            return float.IsInfinity(vector.x) || float.IsInfinity(vector.y);
-        }
-
-        public static bool IsInfinity(this Vector3 vector) {
-            return float.IsInfinity(vector.x) || float.IsInfinity(vector.y) || float.IsInfinity(vector.z);
-        }
-
-        public static string Join<T>(this T[] array, string separator) {
-            string s = "";
-            for (int i = 0; i < array.Length - 1; i++) {
-                s += array[i].ToString() + separator;
-            }
-            s += array[array.Length - 1].ToString();
-            return s;
-        }
-
-        public static string Join<T>(this List<T> list, string separator) {
-            string s = "";
-            for (int i = 0; i < list.Count - 1; i++) {
-                s += list[i].ToString() + separator;
-            }
-            s += list[list.Count - 1].ToString();
-            return s;
-        }
-
         public static void DrawGizmos(this UnityEvent unityEvent, Transform self, Color color, float size) {
             ((UnityEventBase)unityEvent).DrawGizmos(self, color, size);
         }
@@ -78,6 +45,14 @@ namespace HedraLibrary {
             }
         }
 
+        public static void DrawUnityEventRelation(Transform self, Transform other, float size) {
+            if (self == other || self == other.parent) {
+                Gizmos.DrawWireSphere(self.position, size);
+            } else {
+                Gizmos.DrawLine(self.position, other.transform.position);
+            }
+        }
+
         public static void DrawWireCube(Vector3 center, Vector3 size, Quaternion rotation) {
             Matrix4x4 cubeTransform = Matrix4x4.TRS(center, rotation, size);
             Matrix4x4 oldGizmosMatrix = Gizmos.matrix;
@@ -86,12 +61,25 @@ namespace HedraLibrary {
             Gizmos.matrix = oldGizmosMatrix;
         }
 
-        public static void DrawUnityEventRelation(Transform self, Transform other, float size) {
-            if (self == other || self == other.parent) {
-                Gizmos.DrawWireSphere(self.position, size);
+
+        public static void DrawWireCube(Collider collider, Quaternion rotation) {
+            if (collider == null) {
+                return;
+            }
+
+            if (collider is BoxCollider) {
+                BoxCollider box = (BoxCollider)collider;
+                Hedra.DrawWireCube(box.bounds.center, box.size, rotation);
             } else {
-                Gizmos.DrawLine(self.position, other.transform.position);
+                Hedra.DrawWireCube(collider.bounds.center, collider.bounds.size, rotation);
             }
         }
+
+#if UNITY_EDITOR
+        public static void DrawCircle(Color color, Vector3 center, Vector3 up, float radius) {
+            Handles.color = color;
+            Handles.DrawWireDisc(center, up, radius);
+        }
+#endif
     }
 }

@@ -1,4 +1,4 @@
-﻿/*
+﻿/* 
  * Hedra's partial class for screen and camera management.
  *
  * @author  Olsyx (Olatz Castaño)
