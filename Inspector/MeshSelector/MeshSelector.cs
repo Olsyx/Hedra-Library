@@ -31,7 +31,6 @@ namespace HedraLibrary.Inspector {
         
         public void ScrollVariation(int increment) {
             variation += increment;
-            Debug.Log(variation);
         }
 
         public void SetMesh() {
@@ -64,7 +63,7 @@ namespace HedraLibrary.Inspector {
                 renderer.materials = item.materials;
             }
             transform.localPosition = item.localPosition;
-            transform.rotation = Quaternion.Euler(item.rotation);
+            transform.localRotation = Quaternion.Euler(item.rotation);
         }
     }
 }
