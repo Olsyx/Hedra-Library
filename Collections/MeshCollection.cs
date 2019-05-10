@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HedraLibrary.Inspector {
+namespace HedraLibrary.Collections {
     [Serializable]
     public struct MeshCollectionItem {
         public string id;
@@ -12,7 +12,7 @@ namespace HedraLibrary.Inspector {
         public Vector3 rotation;
     }
 
-    [CreateAssetMenu(fileName = "MeshCollection", menuName = "Hedra/Inspector/MeshCollection", order = 1)]
+    [CreateAssetMenu(fileName = "MeshCollection", menuName = "Hedra/Collections/Mesh Collection", order = 1)]
     public class MeshCollection : ScriptableObject {
         public List<MeshCollectionItem> items = new List<MeshCollectionItem>();    
     }

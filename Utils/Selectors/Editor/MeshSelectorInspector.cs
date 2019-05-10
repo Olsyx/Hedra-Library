@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace HedraLibrary.Inspector {
+namespace HedraLibrary.Utils.Selectors {
 
     [CanEditMultipleObjects]
     [CustomEditor(typeof(MeshSelector))]
@@ -21,6 +21,8 @@ namespace HedraLibrary.Inspector {
             if (Selection.activeGameObject != control.gameObject) {
                 return;
             }
+
+            GUILayout.Label($"Current: {control.GetCurrentVariationId()}");
 
             Input();
             control.StoreComponents();
