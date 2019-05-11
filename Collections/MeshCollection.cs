@@ -10,6 +10,7 @@ namespace HedraLibrary.Collections {
         public Material[] materials;
         public Vector3 localPosition;
         public Vector3 rotation;
+        public Vector3 scale;
     }
 
     [CreateAssetMenu(fileName = "MeshCollection", menuName = "Hedra/Collections/Mesh Collection", order = 1)]

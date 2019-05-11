@@ -69,6 +69,7 @@ namespace HedraLibrary.Utils.Selectors {
 
             transform.localPosition = item.localPosition;
             transform.localRotation = Quaternion.Euler(item.rotation);
+            transform.localScale = item.scale;
             AdaptCollider();
         }
 
@@ -85,7 +86,7 @@ namespace HedraLibrary.Utils.Selectors {
 
         #region Queries
         public string GetCurrentVariationId() {
-            if (collection.items.Count <= 0) {
+            if (collection == null || collection.items.Count <= 0) {
                 return "";
             }
             return collection.items[variation].id;
