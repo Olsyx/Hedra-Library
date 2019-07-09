@@ -3,9 +3,9 @@
 * that do not fit in other categories.
 *
 * @author  Olsyx (Olatz Castaño)
-* @source https://github.com/Darkatom/Hedra-Library
+* @source  https://github.com/Olsyx/Hedra-Library
 * @since   Unity 2017.1.0p4
-* @last    Unity 2017.2.0f3
+* @last    Unity 2018.3.0f2
 */
 
 using System;
