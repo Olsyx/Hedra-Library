@@ -242,10 +242,7 @@ namespace HedraLibrary {
         /// <returns></returns>
         public static float Angle(Vector2 A, Vector2 B) {
             float angle = Mathf.Atan2(B.y, B.x) - Mathf.Atan2(A.y, A.x);
-            angle *= Mathf.Rad2Deg;
-            angle = (angle > 180f) ? angle - 360f : angle;
-            angle = (angle < -180f) ? angle + 360f : angle;
-            return angle;
+            return angle * Mathf.Rad2Deg;
         }
 
         /// <summary>
