@@ -285,7 +285,17 @@ namespace HedraLibrary {
             Vector2 origin = a.ToLine().IntersectionPoint(b.ToLine());
             return Angle(origin, a.Vector, b.Vector);
         }
-
+        
+        /// <summary>
+        /// Rotates point P by the given degrees around origin.
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="degrees"></param>
+        /// <returns></returns>
+        public static Vector3 Rotate(Vector3 origin, Vector3 P, Quaternion rotation) {
+            return origin + rotation * (P - origin);
+        }
+        
         /// <summary>
         /// Rotates point P by the given degrees around origin.
         /// </summary>
